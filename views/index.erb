@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Needham Circle</title>
+  </head>
+  <body>
+    <h1>Needham Circle - Upcoming Events</h1>
+    <% if @events.nil? %>
+      <p>We're having trouble loading events right now. Please check back soon.</p>
+    <% elsif @events.empty? %>
+      <p>No upcoming events.</p>
+    <% else %>
+      <ul>
+        <% @events.each do |event| %>
+          <li>
+            <%= (event.start.date_time || event.start.date).to_s %> &mdash;
+            <%= event.summary || "(no title)" %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </body>
+</html>
