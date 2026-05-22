@@ -1,63 +1,57 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Submit an Event - Needham Circle</title>
-  </head>
-  <body>
-    <h1>Submit an Event</h1>
-    <p><a href="/">Back to events</a></p>
+<nav class="back-nav"><a href="/" class="back-link">&larr; Back to events</a></nav>
 
-    <% if @submitted %>
-      <p>Thanks! Your submission has been received and is awaiting approval.</p>
-    <% else %>
-      <% if @form_error %>
-        <p>There was a problem with your submission. Please check the fields and try again.</p>
+<h2>Submit an Event</h2>
+
+<% if @submitted %>
+  <div class="thanks" role="status">Thanks! Your submission has been received and is awaiting approval.</div>
+<% else %>
+  <% if @form_error %>
+    <div class="error-summary" role="alert">There was a problem with your submission. Please check the fields and try again.</div>
+  <% end %>
+
+  <form method="post" action="/submit">
+    <input type="hidden" name="authenticity_token" value="<%= session[:csrf] %>">
+
+    <div class="field">
+      <label for="title">Event title</label>
+      <input id="title" type="text" name="title" required maxlength="200" value="<%= @event.value_for(:title) %>">
+      <% @event.errors_for(:title).each do |error| %>
+        <span class="field-error"><%= error %></span>
       <% end %>
-      <form method="post" action="/submit">
-        <input type="hidden" name="authenticity_token" value="<%= session[:csrf] %>">
-        <p>
-          <label>Event title:<br>
-            <input type="text" name="title" required maxlength="200" value="<%= @event.value_for(:title) %>">
-          </label>
-          <% @event.errors_for(:title).each do |error| %>
-            <br><span><%= error %></span>
-          <% end %>
-        </p>
-        <p>
-          <label>Start:<br>
-            <input type="datetime-local" name="start_time" required value="<%= @event.value_for(:start_time) %>">
-          </label>
-          <% @event.errors_for(:start_time).each do |error| %>
-            <br><span><%= error %></span>
-          <% end %>
-        </p>
-        <p>
-          <label>End:<br>
-            <input type="datetime-local" name="end_time" required value="<%= @event.value_for(:end_time) %>">
-          </label>
-          <% @event.errors_for(:end_time).each do |error| %>
-            <br><span><%= error %></span>
-          <% end %>
-        </p>
-        <p>
-          <label>Location:<br>
-            <input type="text" name="location" maxlength="200" value="<%= @event.value_for(:location) %>">
-          </label>
-          <% @event.errors_for(:location).each do |error| %>
-            <br><span><%= error %></span>
-          <% end %>
-        </p>
-        <p>
-          <label>Description:<br>
-            <textarea name="description" rows="4" cols="40" maxlength="2000"><%= @event.value_for(:description) %></textarea>
-          </label>
-          <% @event.errors_for(:description).each do |error| %>
-            <br><span><%= error %></span>
-          <% end %>
-        </p>
-        <p><button type="submit">Submit</button></p>
-      </form>
-    <% end %>
-  </body>
-</html>
+    </div>
+
+    <div class="field">
+      <label for="start_time">Start</label>
+      <input id="start_time" type="datetime-local" name="start_time" required value="<%= @event.value_for(:start_time) %>">
+      <% @event.errors_for(:start_time).each do |error| %>
+        <span class="field-error"><%= error %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <label for="end_time">End</label>
+      <input id="end_time" type="datetime-local" name="end_time" required value="<%= @event.value_for(:end_time) %>">
+      <% @event.errors_for(:end_time).each do |error| %>
+        <span class="field-error"><%= error %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <label for="location">Location</label>
+      <input id="location" type="text" name="location" maxlength="200" value="<%= @event.value_for(:location) %>">
+      <% @event.errors_for(:location).each do |error| %>
+        <span class="field-error"><%= error %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4" maxlength="2000"><%= @event.value_for(:description) %></textarea>
+      <% @event.errors_for(:description).each do |error| %>
+        <span class="field-error"><%= error %></span>
+      <% end %>
+    </div>
+
+    <p><button type="submit">Submit</button></p>
+  </form>
+<% end %>

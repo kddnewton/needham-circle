@@ -1,25 +1,18 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Needham Circle</title>
-  </head>
-  <body>
-    <h1>Needham Circle</h1>
-    <img src="needham-circle.svg" height="200" />
-    <p><a href="/submit">Submit an event</a></p>
-    <% if @events.nil? %>
-      <p>We're having trouble loading events right now. Please check back soon.</p>
-    <% elsif @events.empty? %>
-      <p>No upcoming events.</p>
-    <% else %>
-      <ul>
-        <% @events.each do |event| %>
-          <li>
-            <%= event.starts_at %> &mdash; <%= event.title %>
-          </li>
-        <% end %>
-      </ul>
+<h2>Upcoming Events</h2>
+
+<p class="actions"><a href="/submit" class="button">Submit an event</a></p>
+
+<% if @events.nil? %>
+  <p class="empty-state">We're having trouble loading events right now. Please check back soon.</p>
+<% elsif @events.empty? %>
+  <p class="empty-state">No upcoming events.</p>
+<% else %>
+  <ul class="events">
+    <% @events.each do |event| %>
+      <li>
+        <time class="event-time" datetime="<%= event_datetime(event.starts_at) %>"><%= format_event_time(event.starts_at) %></time>
+        <h3 class="event-title"><%= event.title %></h3>
+      </li>
     <% end %>
-  </body>
-</html>
+  </ul>
+<% end %>
