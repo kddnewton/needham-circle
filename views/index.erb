@@ -6,6 +6,7 @@
   </head>
   <body>
     <h1>Needham Circle - Upcoming Events</h1>
+    <p><a href="/submit">Submit an event</a></p>
     <% if @events.nil? %>
       <p>We're having trouble loading events right now. Please check back soon.</p>
     <% elsif @events.empty? %>
@@ -14,8 +15,7 @@
       <ul>
         <% @events.each do |event| %>
           <li>
-            <%= (event.start.date_time || event.start.date).to_s %> &mdash;
-            <%= event.summary || "(no title)" %>
+            <%= event.starts_at %> &mdash; <%= event.title %>
           </li>
         <% end %>
       </ul>

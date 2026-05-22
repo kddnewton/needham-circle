@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Submit an Event - Needham Circle</title>
+  </head>
+  <body>
+    <h1>Submit an Event</h1>
+    <p><a href="/">Back to events</a></p>
+
+    <% if @submitted %>
+      <p>Thanks! Your submission has been received and is awaiting approval.</p>
+    <% else %>
+      <% if @form_error %>
+        <p>There was a problem with your submission. Please check the fields and try again.</p>
+      <% end %>
+      <form method="post" action="/submit">
+        <p>
+          <label>Event title:<br>
+            <input type="text" name="title" required value="<%= @event.title %>">
+          </label>
+        </p>
+        <p>
+          <label>Start:<br>
+            <input type="datetime-local" name="start" required value="<%= @event.starts_at %>">
+          </label>
+        </p>
+        <p>
+          <label>End:<br>
+            <input type="datetime-local" name="end" required value="<%= @event.ends_at %>">
+          </label>
+        </p>
+        <p>
+          <label>Location:<br>
+            <input type="text" name="location" value="<%= @event.location %>">
+          </label>
+        </p>
+        <p>
+          <label>Description:<br>
+            <textarea name="description" rows="4" cols="40"><%= @event.description %></textarea>
+          </label>
+        </p>
+        <p><button type="submit">Submit</button></p>
+      </form>
+    <% end %>
+  </body>
+</html>

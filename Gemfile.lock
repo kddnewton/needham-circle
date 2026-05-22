@@ -87,6 +87,7 @@ PLATFORMS
 
 DEPENDENCIES
   google-apis-calendar_v3
+  googleauth
   puma
   rackup
   sinatra
