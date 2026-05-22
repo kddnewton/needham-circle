@@ -125,6 +125,7 @@ module NeedhamCircle
 
   class App < Sinatra::Base
     set :root, File.expand_path("..", __dir__)
+    set :erb, escape_html: true
 
     helpers do
       def google_calendar
