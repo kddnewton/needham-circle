@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Needham Circle logo">
+  <style>
+    :root {
+      --dark-blue: #294982;
+      --light-blue: #8db8dd;
+    }
+  </style>
+
+  <rect width="100" height="100" rx="5" fill="var(--dark-blue)" />
+
+  <g fill="white">
+    <circle cx="50" cy="50" r="40" />
+    <circle cx="50" cy="12" r="9" />
+    <circle cx="88" cy="50" r="9" />
+    <circle cx="12" cy="50" r="9" />
+    <rect x="40" width="20" y="84" height="14" rx="4" />
+  </g>
+
+  <defs>
+    <g id="figure">
+      <circle cx="50" cy="12" r="4.5" fill="var(--light-blue)" stroke="var(--dark-blue)" stroke-width="2" />
+      <path d="M 33 26 A 27 27 0 0 1 67 26" fill="none" stroke="var(--dark-blue)" stroke-width="9" stroke-linecap="round" />
+      <path d="M 33 26 A 27 27 0 0 1 67 26" fill="none" stroke="var(--light-blue)" stroke-width="4" stroke-linecap="round" />
+      <path d="M 44 22 L 45 32 A 27 27 0 0 1 55 32 L 56 22 Z" fill="var(--light-blue)" />
+      <line x1="44" y1="23.8" x2="45" y2="31" stroke="var(--dark-blue)" stroke-width="2" stroke-linecap="round" />
+      <line x1="55" y1="31" x2="56" y2="23.8" stroke="var(--dark-blue)" stroke-width="2" stroke-linecap="round" />
+    </g>
+  </defs>
+
+  <use href="#figure" />
+  <use href="#figure" transform="rotate(90 50 50)" />
+  <use href="#figure" transform="rotate(270 50 50)" />
+
+  <circle cx="50" cy="72" r="4.5" fill="var(--light-blue)" stroke="var(--dark-blue)" stroke-width="2"/>
+  <path d="M 67 74 A 27 27 0 0 1 33 74" fill="none" stroke="var(--dark-blue)" stroke-width="9" stroke-linecap="round" />
+  <path d="M 67 74 A 27 27 0 0 1 33 74" fill="none" stroke="var(--light-blue)" stroke-width="4" stroke-linecap="round" />
+  <rect x="45" y="79" width="10" height="15.5" rx="1" fill="var(--light-blue)" />
+  <line x1="45" y1="83.1" x2="45" y2="93" stroke="var(--dark-blue)" stroke-width="3" stroke-linecap="round" />
+  <line x1="55" y1="83.1" x2="55" y2="93" stroke="var(--dark-blue)" stroke-width="3" stroke-linecap="round" />
+</svg>
