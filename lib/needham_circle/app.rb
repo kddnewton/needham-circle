@@ -34,6 +34,7 @@ module NeedhamCircle
     set :erb, escape_html: true
 
     enable :sessions
+    use RateLimit, limit: 5, period: 60, path: "/submit"
     use Rack::Protection::AuthenticityToken
 
     helpers do

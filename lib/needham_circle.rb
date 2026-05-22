@@ -9,3 +9,4 @@ require "time"
 
 require "needham_circle/app"
 require "needham_circle/google_calendar"
+require "needham_circle/rate_limit"
