@@ -15,6 +15,7 @@
         <p>There was a problem with your submission. Please check the fields and try again.</p>
       <% end %>
       <form method="post" action="/submit">
+        <input type="hidden" name="authenticity_token" value="<%= session[:csrf] %>">
         <p>
           <label>Event title:<br>
             <input type="text" name="title" required value="<%= @event.title %>">

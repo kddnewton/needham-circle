@@ -11,5 +11,6 @@ secrets =
 NeedhamCircle::App.set :service_account_key, secrets.fetch("SERVICE_ACCOUNT_KEY")
 NeedhamCircle::App.set :events_calendar_id, secrets.fetch("EVENTS_CALENDAR_ID")
 NeedhamCircle::App.set :submissions_calendar_id, secrets.fetch("SUBMISSIONS_CALENDAR_ID")
+NeedhamCircle::App.set :session_secret, secrets.fetch("SESSION_SECRET")
 
 run NeedhamCircle::App
