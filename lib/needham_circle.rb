@@ -1,7 +1,7 @@
-require "sinatra"
+require "base64"
 require "google/apis/calendar_v3"
 require "googleauth"
-require "base64"
+require "sinatra/base"
 require "time"
 
 module NeedhamCircle
@@ -28,7 +28,7 @@ module NeedhamCircle
     private
 
     def parse_time(local)
-      Time.strptime(local, "%Y-%m-%dT%H:%M")
+      local && Time.strptime(local, "%Y-%m-%dT%H:%M")
     rescue ArgumentError
     end
   end
@@ -122,65 +122,57 @@ module NeedhamCircle
       )
     end
   end
-end
 
-#——————————————————————————————————————————————————————————————————————————————#
+  class App < Sinatra::Base
+    set :root, File.expand_path("..", __dir__)
 
-$secrets =
-  if File.exist?((filepath = File.expand_path(".env", __dir__)))
-    File.foreach(filepath).to_h { |line| line.chomp.split("=", 2) }
-  else
-    ENV
-  end
-
-get "/" do
-  result =
-    NeedhamCircle::GoogleCalendar
-      .new($secrets.fetch("SERVICE_ACCOUNT_KEY"))
-      .list_events($secrets.fetch("EVENTS_CALENDAR_ID"))
-
-  @events =
-    if (error = result.error)
-      logger.error("Failed to load events: #{error.class}: #{error.message}")
-      nil
-    else
-      result.value
+    helpers do
+      def google_calendar
+        Thread.current[:google_calendar] ||=
+          GoogleCalendar.new(settings.service_account_key)
+      end
     end
 
-  erb :index
-end
+    get "/" do
+      result = google_calendar.list_events(settings.events_calendar_id)
+      if (error = result.error)
+        logger.error("Failed to load events: #{error.class}: #{error.message}")
+      else
+        @events = result.value
+      end
 
-get "/submit" do
-  @event = NeedhamCircle::EventForm.new
-
-  erb :submit
-end
-
-post "/submit" do
-  @event =
-    NeedhamCircle::EventForm.new(
-      title: params["title"],
-      description: params["description"],
-      location: params["location"],
-      starts_at: params["start"],
-      ends_at: params["end"]
-    )
-
-  if @event.valid?
-    result =
-      NeedhamCircle::GoogleCalendar
-        .new($secrets.fetch("SERVICE_ACCOUNT_KEY"))
-        .create_event($secrets.fetch("SUBMISSIONS_CALENDAR_ID"), @event)
-
-    if (error = result.error)
-      logger.error("Failed to create submission: #{error.class}: #{error.message}")
-      @form_error = true
-    else
-      @submitted = true
+      erb :index
     end
-  else
-    @form_error = true
-  end
 
-  erb :submit
+    get "/submit" do
+      @event = EventForm.new
+
+      erb :submit
+    end
+
+    post "/submit" do
+      @event =
+        EventForm.new(
+          title: params["title"],
+          description: params["description"],
+          location: params["location"],
+          starts_at: params["start"],
+          ends_at: params["end"]
+        )
+
+      if @event.valid?
+        result = google_calendar.create_event(settings.submissions_calendar_id, @event)
+        if (error = result.error)
+          logger.error("Failed to create submission: #{error.class}: #{error.message}")
+          @form_error = true
+        else
+          @submitted = true
+        end
+      else
+        @form_error = true
+      end
+
+      erb :submit
+    end
+  end
 end
