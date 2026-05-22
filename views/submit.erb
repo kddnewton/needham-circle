@@ -18,28 +18,43 @@
         <input type="hidden" name="authenticity_token" value="<%= session[:csrf] %>">
         <p>
           <label>Event title:<br>
-            <input type="text" name="title" required value="<%= @event.title %>">
+            <input type="text" name="title" required maxlength="200" value="<%= @event.value_for(:title) %>">
           </label>
+          <% @event.errors_for(:title).each do |error| %>
+            <br><span><%= error %></span>
+          <% end %>
         </p>
         <p>
           <label>Start:<br>
-            <input type="datetime-local" name="start" required value="<%= @event.starts_at %>">
+            <input type="datetime-local" name="start_time" required value="<%= @event.value_for(:start_time) %>">
           </label>
+          <% @event.errors_for(:start_time).each do |error| %>
+            <br><span><%= error %></span>
+          <% end %>
         </p>
         <p>
           <label>End:<br>
-            <input type="datetime-local" name="end" required value="<%= @event.ends_at %>">
+            <input type="datetime-local" name="end_time" required value="<%= @event.value_for(:end_time) %>">
           </label>
+          <% @event.errors_for(:end_time).each do |error| %>
+            <br><span><%= error %></span>
+          <% end %>
         </p>
         <p>
           <label>Location:<br>
-            <input type="text" name="location" value="<%= @event.location %>">
+            <input type="text" name="location" maxlength="200" value="<%= @event.value_for(:location) %>">
           </label>
+          <% @event.errors_for(:location).each do |error| %>
+            <br><span><%= error %></span>
+          <% end %>
         </p>
         <p>
           <label>Description:<br>
-            <textarea name="description" rows="4" cols="40"><%= @event.description %></textarea>
+            <textarea name="description" rows="4" cols="40" maxlength="2000"><%= @event.value_for(:description) %></textarea>
           </label>
+          <% @event.errors_for(:description).each do |error| %>
+            <br><span><%= error %></span>
+          <% end %>
         </p>
         <p><button type="submit">Submit</button></p>
       </form>

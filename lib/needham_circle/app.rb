@@ -2,31 +2,20 @@
 
 module NeedhamCircle
   class App < Sinatra::Base
-    class EventForm
-      attr_reader :title, :description, :location, :starts_at, :ends_at #: String?
-      attr_reader :starts_at_time, :ends_at_time #: Time?
+    class EventForm < Form
+      string_field :title, "Title", required: true, max_length: 200
+      string_field :description, "Description", max_length: 2000
+      string_field :location, "Location", max_length: 200
+      time_field :start_time, "Start time", required: true, future_only: true
+      time_field :end_time, "End time", required: true, future_only: true
 
-      #: (String? title, String? description, String? location, String? starts_at, String? ends_at) -> void
-      def initialize(title: nil, description: nil, location: nil, starts_at: nil, ends_at: nil)
-        @title = title
-        @description = description
-        @location = location
-        @starts_at = starts_at
-        @ends_at = ends_at
-        @starts_at_time = parse_time(starts_at)
-        @ends_at_time = parse_time(ends_at)
-      end
+      validate do |form|
+        start_time = form.coerced_for(:start_time)
+        end_time = form.coerced_for(:end_time)
 
-      #: () -> bool
-      def valid?
-        !@title.to_s.strip.empty? && !@starts_at_time.nil? && !@ends_at_time.nil?
-      end
-
-      private
-
-      def parse_time(local)
-        local && Time.strptime(local, "%Y-%m-%dT%H:%M")
-      rescue ArgumentError
+        if start_time && end_time && end_time <= start_time
+          form.errors[:end_time] << "End time must be after start time."
+        end
       end
     end
 
@@ -62,14 +51,7 @@ module NeedhamCircle
     end
 
     post "/submit" do
-      @event =
-        EventForm.new(
-          title: params["title"],
-          description: params["description"],
-          location: params["location"],
-          starts_at: params["start"],
-          ends_at: params["end"]
-        )
+      @event = EventForm.new(params)
 
       if @event.valid?
         result = google_calendar.create_event(settings.submissions_calendar_id, @event)

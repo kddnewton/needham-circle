@@ -70,11 +70,11 @@ module NeedhamCircle
         @service.insert_event(
           calendar_id,
           Google::Apis::CalendarV3::Event.new(
-            summary: event_form.title,
-            description: event_form.description,
-            location: event_form.location,
-            start: event_date_time(event_form.starts_at_time),
-            end: event_date_time(event_form.ends_at_time)
+            summary: event_form.coerced_for(:title),
+            description: event_form.coerced_for(:description),
+            location: event_form.coerced_for(:location),
+            start: event_date_time(event_form.coerced_for(:start_time)),
+            end: event_date_time(event_form.coerced_for(:end_time))
           )
         )
       end
