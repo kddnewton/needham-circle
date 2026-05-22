@@ -2,9 +2,15 @@
 
 module NeedhamCircle
   class RateLimit
+    class Monotonic
+      def call
+        Process.clock_gettime(Process::CLOCK_MONOTONIC, :second)
+      end
+    end
+
     MAX_TRACKED = 10_000
 
-    def initialize(app, limit:, period:, path:)
+    def initialize(app, limit:, period:, path:, monotonic: Monotonic.new)
       raise ArgumentError, "limit must be positive" unless limit.positive?
       raise ArgumentError, "period must be positive" unless period.positive?
 
@@ -14,20 +20,25 @@ module NeedhamCircle
       @period = period
       @path = path
 
+      @monotonic = monotonic
+      @last_sweep = monotonic.call
+
       @hits = {}
-      @last_sweep = monotonic_now
       @mutex = Mutex.new
 
-      @too_many = [
-        429,
-        { "content-type" => "text/plain", "retry-after" => "#{period}" }.freeze,
-        ["Too many submissions. Please try again later.\n"].freeze
-      ].freeze
+      @retry_after = period.to_s
+      @too_many_body = ["Too many submissions. Please try again later.\n"].freeze
     end
 
     def call(env)
       if env["REQUEST_METHOD"] == "POST" && env["PATH_INFO"] == @path
-        return @too_many if rate_limited?(Rack::Request.new(env).ip)
+        if rate_limited?(Rack::Request.new(env).ip)
+          return [
+            429,
+            { "content-type" => "text/plain", "retry-after" => @retry_after },
+            @too_many_body
+          ]
+        end
       end
 
       @app.call(env)
@@ -36,7 +47,7 @@ module NeedhamCircle
     private
 
     def rate_limited?(ip)
-      now = monotonic_now
+      now = @monotonic.call
       cutoff = now - @period
 
       @mutex.synchronize do
@@ -56,10 +67,6 @@ module NeedhamCircle
 
         limited
       end
-    end
-
-    def monotonic_now
-      Process.clock_gettime(Process::CLOCK_MONOTONIC, :second)
     end
   end
 end
