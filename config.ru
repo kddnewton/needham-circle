@@ -1,12 +1,7 @@
 $:.unshift File.expand_path("lib", __dir__)
 require "needham_circle"
 
-secrets =
-  if File.exist?((filepath = File.expand_path(".env", __dir__)))
-    File.foreach(filepath).to_h { |line| line.chomp.split("=", 2) }
-  else
-    ENV
-  end
+secrets = NeedhamCircle::Env.secrets
 
 NeedhamCircle::App.set :service_account_key, secrets.fetch("SERVICE_ACCOUNT_KEY")
 NeedhamCircle::App.set :events_calendar_id, secrets.fetch("EVENTS_CALENDAR_ID")
