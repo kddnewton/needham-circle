@@ -131,21 +131,30 @@ module NeedhamCircle
 
     #: (String source, Sync::Event event) -> Google::Apis::CalendarV3::Event
     def build_source_event(source, event)
-      Google::Apis::CalendarV3::Event.new(
-        summary: event.title,
-        description: event.description,
-        location: event.location,
-        start: source_date_time(event.start_at, event.timezone),
-        end: source_date_time(event.end_at, event.timezone),
-        source: Google::Apis::CalendarV3::Event::Source.new(
-          title: source,
-          url: event.url
-        ),
-        extended_properties:
-          Google::Apis::CalendarV3::Event::ExtendedProperties.new(
-            private: { "source" => source, "source_id" => event.source_id }
+      google_event =
+        Google::Apis::CalendarV3::Event.new(
+          summary: event.title,
+          description: event.description,
+          location: event.location,
+          start: source_date_time(event.start_at, event.timezone),
+          end: source_date_time(event.end_at, event.timezone),
+          extended_properties:
+            Google::Apis::CalendarV3::Event::ExtendedProperties.new(
+              private: { "source" => source, "source_id" => event.source_id }
+            )
+        )
+
+      # Google rejects Event::Source with a blank url. Only attach the source
+      # block when we actually have one to link to.
+      if event.url && !event.url.empty?
+        google_event.source =
+          Google::Apis::CalendarV3::Event::Source.new(
+            title: source,
+            url: event.url
           )
-      )
+      end
+
+      google_event
     end
 
     #: (String iso, String timezone) -> Google::Apis::CalendarV3::EventDateTime

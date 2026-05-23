@@ -36,4 +36,7 @@ namespace :sync do
 
   desc "Sync Town of Needham (needhamma.gov) events into the public Google Calendar"
   task(:needham_gov) { run_sync { NeedhamCircle::Sync::NeedhamGov } }
+
+  desc "Sync Needham Rotary Club events into the public Google Calendar"
+  task(:needham_rotary) { run_sync { NeedhamCircle::Sync::NeedhamRotary } }
 end
