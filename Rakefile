@@ -11,8 +11,7 @@ end
 task default: :test
 
 namespace :sync do
-  desc "Sync LWV-Needham events into the public Google Calendar"
-  task :lwv do
+  def run_sync
     $LOAD_PATH.unshift File.expand_path("lib", __dir__)
     require "logger"
     require "needham_circle"
@@ -20,7 +19,7 @@ namespace :sync do
     secrets = NeedhamCircle::Env.secrets
     calendar = NeedhamCircle::GoogleCalendar.new(secrets.fetch("SERVICE_ACCOUNT_KEY"))
     sync =
-      NeedhamCircle::Sync::Lwv.new(
+      yield.new(
         calendar: calendar,
         calendar_id: secrets.fetch("EVENTS_CALENDAR_ID"),
         logger: Logger.new($stdout)
@@ -28,4 +27,10 @@ namespace :sync do
 
     exit(sync.call ? 0 : 1)
   end
+
+  desc "Sync LWV-Needham events into the public Google Calendar"
+  task(:lwv) { run_sync { NeedhamCircle::Sync::Lwv } }
+
+  desc "Sync Let's Bike Needham events into the public Google Calendar"
+  task(:lets_bike) { run_sync { NeedhamCircle::Sync::LetsBike } }
 end
