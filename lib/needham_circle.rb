@@ -17,5 +17,6 @@ require "needham_circle/rate_limit"
 require "needham_circle/sync"
 require "needham_circle/sync/lets_bike"
 require "needham_circle/sync/lwv"
+require "needham_circle/sync/needham_gov"
 
 require "needham_circle/app"

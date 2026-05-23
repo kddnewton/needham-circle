@@ -1,0 +1,21 @@
+name: Sync Town of Needham (gov) events
+
+on:
+  schedule:
+    # 07:51 UTC daily — staggered from sync-lwv (07:23) and sync-lets-bike (07:37).
+    - cron: "51 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - run: bundle exec rake sync:needham_gov
+        env:
+          SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+          EVENTS_CALENDAR_ID: ${{ secrets.EVENTS_CALENDAR_ID }}

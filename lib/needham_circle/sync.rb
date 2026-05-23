@@ -18,5 +18,9 @@ module NeedhamCircle
         :timezone,
         keyword_init: true
       )
+
+    # Identifiable User-Agent for all outbound fetches. Ruby's default
+    # "User-Agent: Ruby" is opaque and CivicPlus 404s it.
+    USER_AGENT = "NeedhamCircleSync/1.0 (+https://github.com/kddnewton/needham-circle)"
   end
 end

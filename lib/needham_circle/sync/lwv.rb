@@ -89,7 +89,7 @@ module NeedhamCircle
         http.open_timeout = 10
         http.read_timeout = 30
 
-        response = http.get(uri.request_uri)
+        response = http.get(uri.request_uri, { "User-Agent" => USER_AGENT })
         unless response.is_a?(Net::HTTPSuccess)
           log("fetch page=#{page} returned status #{response.code}")
           return nil
