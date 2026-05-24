@@ -2,9 +2,7 @@ name: Sync Let's Bike Needham events
 
 on:
   schedule:
-    # 07:37 UTC daily — offset from sync-lwv (07:23) so they don't queue up
-    # on the same scheduler tick.
-    - cron: "37 7 * * *"
+    - cron: "23 7 * * *"
   workflow_dispatch:
 
 jobs:
@@ -15,6 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
+          ruby-version: "4.0"
           bundler-cache: true
       - run: bundle exec rake sync:lets_bike
         env:

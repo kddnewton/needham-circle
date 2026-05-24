@@ -2,8 +2,6 @@ name: Sync LWV-Needham events
 
 on:
   schedule:
-    # 07:23 UTC daily — ~2:23 AM ET (winter) / 3:23 AM ET (summer).
-    # Off the hour to dodge GitHub Actions' on-the-hour queue.
     - cron: "23 7 * * *"
   workflow_dispatch:
 
@@ -15,6 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
+          ruby-version: "4.0"
           bundler-cache: true
       - run: bundle exec rake sync:lwv
         env:
