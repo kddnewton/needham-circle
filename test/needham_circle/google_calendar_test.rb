@@ -5,7 +5,8 @@ require "test_helper"
 module NeedhamCircle
   class GoogleCalendarTest < Minitest::Test
     FakeApiStart = Struct.new(:date_time, :date)
-    FakeApiEvent = Struct.new(:summary, :start)
+    FakeApiSource = Struct.new(:url)
+    FakeApiEvent = Struct.new(:summary, :start, :source)
 
     def test_result_wrap_returns_value_on_success
       result = GoogleCalendar::Result.wrap { "hello" }
@@ -52,6 +53,34 @@ module NeedhamCircle
         FakeApiEvent.new("Ok", FakeApiStart.new(nil, "2099-01-02"))
       )
       assert_equal "2099-01-02", view.starts_at
+    end
+
+    def test_event_view_url_returns_source_url
+      view = GoogleCalendar::EventView.new(
+        FakeApiEvent.new("Ok", FakeApiStart.new(nil, nil), FakeApiSource.new("https://example.com/e/1"))
+      )
+      assert_equal "https://example.com/e/1", view.url
+    end
+
+    def test_event_view_url_nil_when_no_source
+      view = GoogleCalendar::EventView.new(
+        FakeApiEvent.new("Ok", FakeApiStart.new(nil, nil), nil)
+      )
+      assert_nil view.url
+    end
+
+    def test_event_view_url_rejects_javascript_scheme
+      view = GoogleCalendar::EventView.new(
+        FakeApiEvent.new("Ok", FakeApiStart.new(nil, nil), FakeApiSource.new("javascript:alert(1)"))
+      )
+      assert_nil view.url
+    end
+
+    def test_event_view_url_rejects_empty_string
+      view = GoogleCalendar::EventView.new(
+        FakeApiEvent.new("Ok", FakeApiStart.new(nil, nil), FakeApiSource.new(""))
+      )
+      assert_nil view.url
     end
   end
 end

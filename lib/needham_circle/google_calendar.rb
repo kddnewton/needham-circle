@@ -36,6 +36,15 @@ module NeedhamCircle
       def starts_at
         @event.start.date_time || @event.start.date
       end
+
+      # Source URL we set on synced events. Restricted to http(s) so a
+      # compromised upstream feed can't slip a `javascript:` URI past us.
+      #: () -> String?
+      def url
+        candidate = @event.source&.url
+        return candidate if candidate.is_a?(String) && candidate.match?(%r{\Ahttps?://})
+        nil
+      end
     end
 
     class SourceEventView

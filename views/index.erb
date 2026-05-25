@@ -11,7 +11,13 @@
     <% @events.each do |event| %>
       <li>
         <time class="event-time" datetime="<%= event_datetime(event.starts_at) %>"><%= format_event_time(event.starts_at) %></time>
-        <h3 class="event-title"><%= event.title %></h3>
+        <h3 class="event-title">
+          <% if event.url %>
+            <a href="<%= event.url %>" target="_blank" rel="noopener noreferrer"><%= event.title %></a>
+          <% else %>
+            <%= event.title %>
+          <% end %>
+        </h3>
       </li>
     <% end %>
   </ul>

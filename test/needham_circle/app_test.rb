@@ -6,7 +6,7 @@ module NeedhamCircle
   class AppTest < Minitest::Test
     include Rack::Test::Methods
 
-    FakeEventView = Struct.new(:title, :starts_at)
+    FakeEventView = Struct.new(:title, :starts_at, :url)
 
     class FakeCalendar
       attr_accessor :events_to_return, :list_error, :create_error
@@ -79,6 +79,23 @@ module NeedhamCircle
       get "/"
       assert_equal 200, last_response.status
       assert_includes last_response.body, "trouble loading events"
+    end
+
+    def test_index_wraps_title_in_link_when_event_has_url
+      @fake_calendar.events_to_return = [
+        FakeEventView.new("Summer Picnic", "2099-07-04T12:00", "https://example.com/picnic")
+      ]
+      get "/"
+      assert_match %r{<a href="https://example\.com/picnic"[^>]*>Summer Picnic</a>}, last_response.body
+    end
+
+    def test_index_renders_plain_title_when_event_has_no_url
+      @fake_calendar.events_to_return = [
+        FakeEventView.new("Bake Sale", "2099-09-04T12:00", nil)
+      ]
+      get "/"
+      assert_includes last_response.body, "Bake Sale"
+      refute_match %r{<a [^>]*>Bake Sale</a>}, last_response.body
     end
 
     def test_submit_page_renders_form_with_csrf_token
