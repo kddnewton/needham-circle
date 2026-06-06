@@ -172,6 +172,19 @@ a:hover {
   padding-bottom: 0;
 }
 
+.event-month + .event-month {
+  margin-top: 1.5rem;
+}
+
+.event-month-title {
+  background-color: #eee;
+  margin: 2rem -2.0rem 1.5rem -2.0rem;
+  padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
 .event-time {
   display: block;
   font-size: 0.75rem;

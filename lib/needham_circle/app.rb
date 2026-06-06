@@ -28,27 +28,7 @@ module NeedhamCircle
 
     helpers do
       def google_calendar
-        Thread.current[:google_calendar] ||=
-          GoogleCalendar.new(settings.service_account_key)
-      end
-
-      def event_datetime(value)
-        value.respond_to?(:iso8601) ? value.iso8601 : value.to_s
-      end
-
-      def format_event_time(value)
-        case value
-        when DateTime, Time
-          value.strftime("%A, %B %-d at %-l:%M %p")
-        when String
-          begin
-            Date.parse(value).strftime("%A, %B %-d")
-          rescue ArgumentError
-            value
-          end
-        else
-          value.to_s
-        end
+        Thread.current[:google_calendar] ||= GoogleCalendar.new(settings.service_account_key)
       end
     end
 

@@ -22,28 +22,71 @@ module NeedhamCircle
     end
 
     class EventView
-      #: (Google::Apis::CalendarV3::Event event) -> void
-      def initialize(event)
+      #: (Google::Apis::CalendarV3::Event event, (EventDateTimeFormatter | EventDateFormatter) formatter) -> void
+      def initialize(event, formatter)
         @event = event
+        @formatter = formatter
       end
 
       #: () -> String
       def title
-        @event.summary || "(no title)"
+        @event.summary
+      end
+
+      #: () -> String?
+      def url
+        if (candidate = @event.source&.url)&.match?(%r{\Ahttps?://})
+          candidate
+        end
       end
 
       #: () -> String
-      def starts_at
-        @event.start.date_time || @event.start.date
+      def iso8601
+        @formatter.iso8601(@event)
       end
 
-      # Source URL we set on synced events. Restricted to http(s) so a
-      # compromised upstream feed can't slip a `javascript:` URI past us.
-      #: () -> String?
-      def url
-        candidate = @event.source&.url
-        return candidate if candidate.is_a?(String) && candidate.match?(%r{\Ahttps?://})
-        nil
+      #: () -> String
+      def formatted_starts_at
+        @formatter.formatted_starts_at(@event)
+      end
+
+      #: () -> String
+      def formatted_month
+        @formatter.formatted_month(@event)
+      end
+    end
+
+    class EventDateTimeFormatter
+      #: (Google::Apis::CalendarV3::Event event) -> String
+      def iso8601(event)
+        event.start.date_time.iso8601
+      end
+
+      #: (Google::Apis::CalendarV3::Event event) -> String
+      def formatted_starts_at(event)
+        event.start.date_time.strftime("%A, %B %-d at %-l:%M %p")
+      end
+
+      #: (Google::Apis::CalendarV3::Event event) -> String
+      def formatted_month(event)
+        event.start.date_time.strftime("%B %Y")
+      end
+    end
+
+    class EventDateFormatter
+      #: (Google::Apis::CalendarV3::Event event) -> String
+      def iso8601(event)
+        event.start.date.iso8601
+      end
+
+      #: (Google::Apis::CalendarV3::Event event) -> String
+      def formatted_starts_at(event)
+        event.start.date.strftime("%A, %B %-d")
+      end
+
+      #: (Google::Apis::CalendarV3::Event event) -> String
+      def formatted_month(event)
+        event.start.date.strftime("%B %Y")
       end
     end
 
@@ -80,7 +123,18 @@ module NeedhamCircle
             max_results: 50
           )
           .items
-          .map { |google_event| EventView.new(google_event) }
+          .map do |google_event|
+            EventView.new(
+              google_event,
+              if google_event.start.date_time
+                EventDateTimeFormatter.new
+              elsif google_event.start_date
+                EventDateFormatter.new
+              else
+                raise
+              end
+            )
+          end
       end
     end
 

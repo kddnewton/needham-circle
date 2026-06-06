@@ -7,18 +7,23 @@
 <% elsif @events.empty? %>
   <p class="empty-state">No upcoming events.</p>
 <% else %>
-  <ul class="events">
-    <% @events.each do |event| %>
-      <li>
-        <time class="event-time" datetime="<%= event_datetime(event.starts_at) %>"><%= format_event_time(event.starts_at) %></time>
-        <h3 class="event-title">
-          <% if event.url %>
-            <a href="<%= event.url %>" target="_blank" rel="noopener noreferrer"><%= event.title %></a>
-          <% else %>
-            <%= event.title %>
-          <% end %>
-        </h3>
-      </li>
-    <% end %>
-  </ul>
+  <% @events.group_by(&:formatted_month).each do |month, events| %>
+    <section class="event-month">
+      <h3 class="event-month-title"><%= month %></h3>
+      <ul class="events">
+        <% events.each do |event| %>
+          <li>
+            <time class="event-time" datetime="<%= event.iso8601 %>"><%= event.formatted_starts_at %></time>
+            <h3 class="event-title">
+              <% if event.url %>
+                <a href="<%= event.url %>" target="_blank" rel="noopener noreferrer"><%= event.title %></a>
+              <% else %>
+                <%= event.title %>
+              <% end %>
+            </h3>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
 <% end %>
