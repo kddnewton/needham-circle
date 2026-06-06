@@ -223,6 +223,7 @@ form label {
 
 input[type="text"],
 input[type="datetime-local"],
+input[type="url"],
 textarea {
   display: block;
   width: 100%;
@@ -233,6 +234,10 @@ textarea {
   border: 2px solid var(--border);
   border-radius: 8px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="url"] {
+  display: block;
 }
 
 input:focus,

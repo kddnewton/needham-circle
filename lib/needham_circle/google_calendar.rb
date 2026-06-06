@@ -141,8 +141,7 @@ module NeedhamCircle
     #: (String calendar_id, EventForm event_form) -> Result[void]
     def create_event(calendar_id, event_form)
       Result.wrap do
-        @service.insert_event(
-          calendar_id,
+        google_event =
           Google::Apis::CalendarV3::Event.new(
             summary: event_form.coerced_for(:title),
             description: event_form.coerced_for(:description),
@@ -150,7 +149,18 @@ module NeedhamCircle
             start: event_date_time(event_form.coerced_for(:start_time)),
             end: event_date_time(event_form.coerced_for(:end_time))
           )
-        )
+
+        # Google rejects Event::Source with a blank url. Only attach the source
+        # block when we actually have one to link to.
+        if (url = event_form.coerced_for(:url)) && !url.empty?
+          google_event.source =
+            Google::Apis::CalendarV3::Event::Source.new(
+              title: "Event website",
+              url: url
+            )
+        end
+
+        @service.insert_event(calendar_id, google_event)
       end
     end
 

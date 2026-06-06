@@ -55,6 +55,28 @@ module NeedhamCircle
       end
     end
 
+    class URLField < Field
+      #: (Symbol name, String human, ?required: bool, ?max_length: Integer?) -> void
+      def initialize(name, human, required: false, max_length: nil)
+        super(name, human)
+        @required = required
+        @max_length = max_length
+      end
+
+      #: (String? value) -> String
+      def coerce(value)
+        String(value).strip
+      end
+
+      #: (String value) -> String?
+      def validate(value)
+        return "#{@human} is required." if @required && value.empty?
+        return "#{@human} must be at most #{@max_length} characters." if @max_length && value.length > @max_length
+        return "#{@human} must be a valid URL." if !value.empty? && !(value =~ /\Ahttps:\/\/.*\z/)
+        nil
+      end
+    end
+
     attr_reader :values #: Hash[Symbol, String]
     attr_reader :coerced #: Hash[Symbol, untyped]
     attr_reader :errors #: Hash[Symbol, Array[String]]
@@ -122,6 +144,11 @@ module NeedhamCircle
       #: (Symbol name, String human, **options) -> void
       def time_field(name, human, **options)
         field TimeField.new(name, human, **options)
+      end
+
+      #: (Symbol name, String human, **options) -> void
+      def url_field(name, human, **options)
+        field URLField.new(name, human, **options)
       end
 
       #: () -> Array[Proc]

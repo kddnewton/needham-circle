@@ -8,6 +8,7 @@ module NeedhamCircle
       string_field :location, "Location", max_length: 200
       time_field :start_time, "Start time", required: true, future_only: true
       time_field :end_time, "End time", required: true, future_only: true
+      url_field :url, "URL", max_length: 500
 
       validate do |form|
         start_time = form.coerced_for(:start_time)
