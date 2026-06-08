@@ -8,11 +8,13 @@ require "rack/protection"
 require "sinatra/base"
 require "tilt/erubi"
 require "time"
+require "uri"
 
 require "needham_circle/env"
 require "needham_circle/form"
 require "needham_circle/google_calendar"
 require "needham_circle/rate_limit"
+require "needham_circle/source"
 
 require "needham_circle/sync"
 require "needham_circle/sync/lets_bike"

@@ -1,29 +1,40 @@
-<h2>Upcoming Events</h2>
+<h2 class="visually-hidden">Upcoming Events</h2>
 
-<p class="actions"><a href="/submit" class="button">Submit an event</a></p>
+<div class="event-filters" data-filters>
+  <div class="filter-bar">
+    <form class="filter-search-form" method="get" action="/">
+      <% unless @filter.selected_sources.empty? %>
+        <input type="hidden" name="source" value="<%= @filter.selected_sources.join(",") %>">
+      <% end %>
+      <input
+        class="filter-search"
+        type="search"
+        name="q"
+        placeholder="Search events"
+        aria-label="Search events"
+        value="<%= @filter.query %>"
+        data-search
+      >
+    </form>
+  </div>
 
-<% if @events.nil? %>
-  <p class="empty-state">We're having trouble loading events right now. Please check back soon.</p>
-<% elsif @events.empty? %>
-  <p class="empty-state">No upcoming events.</p>
-<% else %>
-  <% @events.group_by(&:formatted_month).each do |month, events| %>
-    <section class="event-month">
-      <h3 class="event-month-title"><%= month %></h3>
-      <ul class="events">
-        <% events.each do |event| %>
-          <li>
-            <time class="event-time" datetime="<%= event.iso8601 %>"><%= event.formatted_starts_at %></time>
-            <h3 class="event-title">
-              <% if event.url %>
-                <a href="<%= event.url %>" target="_blank" rel="noopener noreferrer"><%= event.title %></a>
-              <% else %>
-                <%= event.title %>
-              <% end %>
-            </h3>
-          </li>
-        <% end %>
-      </ul>
-    </section>
-  <% end %>
-<% end %>
+  <div class="filter-sources">
+    <% @filter.sources.each do |source| %>
+      <% active = @filter.selected?(source.slug) %>
+      <a
+        class="filter-chip<%= " is-active" if active %>"
+        href="<%= @filter.toggle_url(source.slug) %>"
+        data-source="<%= source.slug %>"
+        aria-pressed="<%= active %>"
+      ><%= source.label %></a>
+    <% end %>
+  </div>
+</div>
+
+<a href="/submit" class="button cta">Submit an event</a>
+
+<div data-events>
+  <%== erb :events_list, layout: false %>
+</div>
+
+<script src="/filters.js" defer></script>

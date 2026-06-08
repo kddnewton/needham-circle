@@ -13,16 +13,19 @@ module NeedhamCircle
     end
 
     class StringField < Field
-      #: (Symbol name, String human, ?required: bool, ?max_length: Integer?) -> void
-      def initialize(name, human, required: false, max_length: nil)
+      #: (Symbol name, String human, ?required: bool, ?max_length: Integer?, ?nullify: bool) -> void
+      def initialize(name, human, required: false, max_length: nil, nullify: false)
         super(name, human)
         @required = required
         @max_length = max_length
+        @nullify = nullify
       end
 
       #: (String? value) -> String
       def coerce(value)
-        String(value).strip
+        value = String(value).strip
+        value = nil if @nullify && value.empty?
+        value
       end
 
       #: (String value) -> String?
@@ -73,6 +76,29 @@ module NeedhamCircle
         return "#{@human} is required." if @required && value.empty?
         return "#{@human} must be at most #{@max_length} characters." if @max_length && value.length > @max_length
         return "#{@human} must be a valid URL." if !value.empty? && !(value =~ /\Ahttps:\/\/.*\z/)
+        nil
+      end
+    end
+
+    class MultiSelectField < Field
+      attr_reader :values #: Array[String]
+
+      #: (Symbol name, String human, values: Array[String]) -> void
+      def initialize(name, human, values:)
+        super(name, human)
+        @values = values
+      end
+
+      # Splits the comma-joined param and keeps only known values, preserving
+      # the declared option order so the selection is stable.
+      #: (String? value) -> Array[String]
+      def coerce(value)
+        selected = String(value).split(",")
+        @values.select { |allowed| selected.include?(allowed) }
+      end
+
+      #: (Array[String] value) -> String?
+      def validate(value)
         nil
       end
     end
@@ -134,6 +160,11 @@ module NeedhamCircle
       #: (Field value) -> void
       def field(value)
         fields << value
+      end
+
+      #: (Symbol name, String human, **options) -> void
+      def multi_select_field(name, human, **options)
+        field MultiSelectField.new(name, human, **options)
       end
 
       #: (Symbol name, String human, **options) -> void

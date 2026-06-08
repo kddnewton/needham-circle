@@ -34,6 +34,11 @@ module NeedhamCircle
       end
 
       #: () -> String?
+      def source
+        @event.extended_properties&.private&.[]("source")
+      end
+
+      #: () -> String?
       def url
         if (candidate = @event.source&.url)&.match?(%r{\Ahttps?://})
           candidate
@@ -111,12 +116,13 @@ module NeedhamCircle
         )
     end
 
-    #: (String calendar_id) -> Result[Array[EventView]]
-    def list_events(calendar_id)
+    #: (String calendar_id, ?query: String?) -> Result[Array[EventView]]
+    def list_events(calendar_id, query: nil)
       Result.wrap do
         @service
           .list_events(
             calendar_id,
+            q: query,
             single_events: true,
             order_by: "startTime",
             time_min: Time.now.iso8601,

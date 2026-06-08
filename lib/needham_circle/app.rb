@@ -20,6 +20,51 @@ module NeedhamCircle
       end
     end
 
+    class FilterForm < Form
+      string_field :q, "Search", nullify: true
+      multi_select_field :source, "Source", values: Source::ALL.map(&:slug)
+
+      #: () -> Array[Source]
+      def sources
+        Source::ALL
+      end
+
+      #: () -> String?
+      def query
+        coerced_for(:q)
+      end
+
+      #: () -> Array[String]
+      def selected_sources
+        coerced_for(:source)
+      end
+
+      #: (String slug) -> bool
+      def selected?(slug)
+        selected_sources.include?(slug)
+      end
+
+      #: () -> Array[String?]
+      def selected_values
+        Source::ALL.select { |source| selected?(source.slug) }.map(&:value)
+      end
+
+      #: (String slug) -> String
+      def toggle_url(slug)
+        slugs = selected_sources
+        slugs = slugs.include?(slug) ? slugs - [slug] : slugs + [slug]
+
+        query_params = {}
+        query_params["source"] = slugs.join(",") unless slugs.empty?
+
+        if (q = query)
+          query_params["q"] = q
+        end
+
+        query_params.empty? ? "/" : "/?#{URI.encode_www_form(query_params)}"
+      end
+    end
+
     set :root, File.expand_path("../..", __dir__)
     set :erb, escape_html: true
 
@@ -31,27 +76,51 @@ module NeedhamCircle
       def google_calendar
         Thread.current[:google_calendar] ||= GoogleCalendar.new(settings.service_account_key)
       end
+
+      #: (EventForm event) -> GoogleCalendar::Result[void]
+      def create_event(event)
+        result = google_calendar.create_event(settings.submissions_calendar_id, event)
+        if (error = result.error)
+          logger.error("Failed to create submission: #{error.class}: #{error.message}")
+        end
+        result
+      end
+
+      #: (FilterForm filter) -> Array[GoogleCalendar::EventView]?
+      def list_events(filter)
+        result = google_calendar.list_events(settings.events_calendar_id, query: filter.query)
+        if (error = result.error)
+          logger.error("Failed to load events: #{error.class}: #{error.message}")
+          return nil
+        end
+
+        values = filter.selected_values
+        return result.value if values.empty?
+
+        result.value.select do |event|
+          source = event.source
+          source = nil if source && source.empty?
+          values.include?(source)
+        end
+      end
     end
 
     get "/" do
       @page_title = "Needham Circle"
       @page_description = "Upcoming community events in Needham Circle. Browse what's happening, and submit your own events."
-
-      result = google_calendar.list_events(settings.events_calendar_id)
-      if (error = result.error)
-        logger.error("Failed to load events: #{error.class}: #{error.message}")
-      else
-        @events = result.value
-      end
-
+      @events = list_events(@filter = FilterForm.new(params))
       erb :index
+    end
+
+    get "/events" do
+      @events = list_events(@filter = FilterForm.new(params))
+      erb :events_list, layout: false
     end
 
     get "/submit" do
       @page_title = "Needham Circle — Submit an Event"
       @page_description = "Submit a community event to the Needham Circle calendar."
       @event = EventForm.new
-
       erb :submit
     end
 
@@ -61,9 +130,7 @@ module NeedhamCircle
       @event = EventForm.new(params)
 
       if @event.valid?
-        result = google_calendar.create_event(settings.submissions_calendar_id, @event)
-        if (error = result.error)
-          logger.error("Failed to create submission: #{error.class}: #{error.message}")
+        if (error = create_event(@event).error)
           @form_error = true
         else
           @submitted = true

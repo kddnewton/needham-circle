@@ -7,7 +7,7 @@ require "uri"
 module NeedhamCircle
   module Sync
     class NeedhamGov
-      SOURCE = "needham-gov"
+      SOURCE = Source::TN
       CATEGORY_ID = 84 # Community Events
       BASE_URL = "https://www.needhamma.gov"
       ENDPOINT = "#{BASE_URL}/common/modules/iCalendar/iCalendar.aspx?catID=#{CATEGORY_ID}&feed=calendar"
@@ -32,7 +32,7 @@ module NeedhamCircle
 
       #: () -> bool
       def call
-        list_result = @calendar.list_events_by_source(@calendar_id, SOURCE)
+        list_result = @calendar.list_events_by_source(@calendar_id, SOURCE.value)
         if (error = list_result.error)
           log("list_events_by_source failed: #{error.class}: #{error.message}")
           return false
@@ -51,7 +51,7 @@ module NeedhamCircle
           result =
             @calendar.upsert_source_event(
               @calendar_id,
-              SOURCE,
+              SOURCE.value,
               existing_ids[event.source_id],
               event
             )

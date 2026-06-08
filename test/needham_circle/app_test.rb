@@ -8,16 +8,18 @@ module NeedhamCircle
 
     class FakeCalendar
       attr_accessor :events_to_return, :list_error, :create_error
-      attr_reader :created
+      attr_reader :created, :last_query
 
       def initialize
         @events_to_return = []
         @list_error = nil
         @create_error = nil
         @created = []
+        @last_query = nil
       end
 
-      def list_events(_calendar_id)
+      def list_events(_calendar_id, query: nil)
+        @last_query = query
         GoogleCalendar::Result.new(
           @list_error ? nil : @events_to_return,
           @list_error

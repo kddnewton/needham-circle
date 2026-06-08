@@ -74,6 +74,19 @@ body {
   color: var(--sky);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 main {
   background: var(--white);
   border-radius: 14px;
@@ -152,6 +165,83 @@ a:hover {
   margin-bottom: 1.5rem;
 }
 
+.event-filters {
+  margin-bottom: 1.5rem;
+}
+
+.filter-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--navy);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.filter-chip:hover {
+  border-color: var(--mid);
+  background: var(--white);
+}
+
+.filter-chip.is-active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--white);
+  box-shadow: 0 1px 3px rgba(28, 71, 142, 0.25);
+}
+
+.filter-chip.is-active:hover {
+  background: var(--navy);
+}
+
+.filter-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.filter-search-form {
+  position: relative;
+  flex: 1;
+  margin: 0;
+}
+
+/* The magnifying glass is a mask tinted via background-color so it can shift
+   color on focus. It sits dull by default and brightens to the same blue the
+   input border picks up when active (see the input:focus rule). */
+.filter-search-form::before {
+  content: "";
+  position: absolute;
+  left: 0.85rem;
+  top: 0;
+  bottom: 0;
+  width: 1.1rem;
+  background-color: var(--sky);
+  mask: url("/search.svg") no-repeat center / 1.1rem 1.1rem;
+  pointer-events: none;
+  transition: background-color 0.15s ease;
+}
+
+.filter-search-form:focus-within::before {
+  background-color: var(--mid);
+}
+
 .events {
   list-style: none;
   padding: 0;
@@ -224,6 +314,7 @@ form label {
 input[type="text"],
 input[type="datetime-local"],
 input[type="url"],
+.filter-search,
 textarea {
   display: block;
   width: 100%;
@@ -238,6 +329,18 @@ textarea {
 
 input[type="url"] {
   display: block;
+}
+
+.filter-search {
+  padding-left: 2.5rem;
+}
+
+.cta {
+  padding: 0.5rem 1rem;
+}
+
+.event-month:first-child > h3 {
+  margin-top: 1.5rem;
 }
 
 input:focus,
@@ -318,6 +421,12 @@ button[type="submit"]:active {
   }
   .site-header .tagline {
     font-size: 0.6875rem;
+  }
+  .filter-bar {
+    flex-direction: column;
+  }
+  .filter-submit {
+    justify-content: center;
   }
   main {
     padding: 1.25rem;
