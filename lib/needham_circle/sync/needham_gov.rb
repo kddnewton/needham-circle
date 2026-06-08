@@ -7,7 +7,6 @@ require "uri"
 module NeedhamCircle
   module Sync
     class NeedhamGov
-      SOURCE = Source::TN
       CATEGORY_ID = 84 # Community Events
       BASE_URL = "https://www.needhamma.gov"
       ENDPOINT = "#{BASE_URL}/common/modules/iCalendar/iCalendar.aspx?catID=#{CATEGORY_ID}&feed=calendar"
@@ -21,45 +20,17 @@ module NeedhamCircle
       # strip it because we already build a clean URL from the UID.
       DESCRIPTION_URL_SUFFIX = %r{\s*https://www\.needhamma\.gov/calendar\.aspx\?EID=\d+\s*\z}
 
-      #: (calendar: GoogleCalendar, calendar_id: String, ?fetch: ^() -> String?, ?now: DateTime?, ?logger: Logger?) -> void
-      def initialize(calendar:, calendar_id:, fetch: nil, now: nil, logger: nil)
-        @calendar = calendar
-        @calendar_id = calendar_id
+      #: (?fetch: ^() -> String?, ?now: DateTime?, ?logger: Logger?) -> void
+      def initialize(fetch: nil, now: nil, logger: nil)
         @fetch = fetch || method(:fetch_from_api)
         @now = now
         @logger = logger
       end
 
-      #: () -> bool
-      def call
-        result = @calendar.source_ids(@calendar_id, SOURCE.value)
-        if (error = result.error)
-          log("source_ids failed: #{error.class}: #{error.message}")
-          return false
-        end
-
-        existing_ids = result.value
-        events = fetch_events
-        return false if events.nil?
-
-        ok = true
-        events.each do |event|
-          result =
-            @calendar.upsert_source_event(
-              @calendar_id,
-              SOURCE.value,
-              existing_ids[event.source_id],
-              event
-            )
-          if (error = result.error)
-            ok = false
-            log("upsert failed for #{event.source_id}: #{error.class}: #{error.message}")
-          end
-        end
-        ok
+      #: () -> Source
+      def source
+        Source::TN
       end
-
-      private
 
       #: () -> Array[Event]?
       def fetch_events
@@ -84,6 +55,8 @@ module NeedhamCircle
         log("parse failed: #{error.class}: #{error.message}")
         nil
       end
+
+      private
 
       #: () -> String?
       def fetch_from_api

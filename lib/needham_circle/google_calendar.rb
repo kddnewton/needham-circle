@@ -95,17 +95,6 @@ module NeedhamCircle
       end
     end
 
-    class SourceEventView
-      attr_reader :id #: String
-      attr_reader :source_id #: String?
-
-      #: (Google::Apis::CalendarV3::Event event) -> void
-      def initialize(event)
-        @id = event.id
-        @source_id = event.extended_properties&.private&.[]("source_id")
-      end
-    end
-
     #: (String key) -> void
     def initialize(key)
       @service = Google::Apis::CalendarV3::CalendarService.new
@@ -192,7 +181,29 @@ module NeedhamCircle
     #: (String calendar_id, String source, String? existing_event_id, Sync::Event event) -> Result[void]
     def upsert_source_event(calendar_id, source, existing_event_id, event)
       Result.wrap do
-        google_event = build_source_event(source, event)
+        google_event =
+          Google::Apis::CalendarV3::Event.new(
+            summary: event.title,
+            description: event.description,
+            location: event.location,
+            start: source_date_time(event.start_at, event.timezone),
+            end: source_date_time(event.end_at, event.timezone),
+            extended_properties:
+              Google::Apis::CalendarV3::Event::ExtendedProperties.new(
+                private: { "source" => source, "source_id" => event.source_id }
+              )
+          )
+
+        # Google rejects Event::Source with a blank url. Only attach the source
+        # block when we actually have one to link to.
+        if event.url && !event.url.empty?
+          google_event.source =
+            Google::Apis::CalendarV3::Event::Source.new(
+              title: source,
+              url: event.url
+            )
+        end
+
         if existing_event_id
           @service.update_event(calendar_id, existing_event_id, google_event)
         else
@@ -209,34 +220,6 @@ module NeedhamCircle
         date_time: time.strftime("%Y-%m-%dT%H:%M:%S"),
         time_zone: "America/New_York"
       )
-    end
-
-    #: (String source, Sync::Event event) -> Google::Apis::CalendarV3::Event
-    def build_source_event(source, event)
-      google_event =
-        Google::Apis::CalendarV3::Event.new(
-          summary: event.title,
-          description: event.description,
-          location: event.location,
-          start: source_date_time(event.start_at, event.timezone),
-          end: source_date_time(event.end_at, event.timezone),
-          extended_properties:
-            Google::Apis::CalendarV3::Event::ExtendedProperties.new(
-              private: { "source" => source, "source_id" => event.source_id }
-            )
-        )
-
-      # Google rejects Event::Source with a blank url. Only attach the source
-      # block when we actually have one to link to.
-      if event.url && !event.url.empty?
-        google_event.source =
-          Google::Apis::CalendarV3::Event::Source.new(
-            title: source,
-            url: event.url
-          )
-      end
-
-      google_event
     end
 
     #: (String iso, String timezone) -> Google::Apis::CalendarV3::EventDateTime

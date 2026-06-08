@@ -18,11 +18,13 @@ namespace :sync do
 
     secrets = NeedhamCircle::Env.secrets
     calendar = NeedhamCircle::GoogleCalendar.new(secrets.fetch("SERVICE_ACCOUNT_KEY"))
+    logger = Logger.new($stdout)
     sync =
-      yield.new(
+      NeedhamCircle::Sync::Runner.new(
         calendar: calendar,
         calendar_id: secrets.fetch("EVENTS_CALENDAR_ID"),
-        logger: Logger.new($stdout)
+        fetcher: yield.new(logger: logger),
+        logger: logger
       )
 
     exit(sync.call ? 0 : 1)

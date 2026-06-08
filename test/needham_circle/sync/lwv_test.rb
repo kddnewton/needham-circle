@@ -5,29 +5,6 @@ require "test_helper"
 module NeedhamCircle
   module Sync
     class LwvTest < Minitest::Test
-      SourceView = Struct.new(:id, :source_id)
-
-      class FakeCalendar
-        attr_accessor :existing, :list_error, :upsert_error
-        attr_reader :upserts
-
-        def initialize
-          @existing = []
-          @list_error = nil
-          @upsert_error = nil
-          @upserts = []
-        end
-
-        def list_events_by_source(_calendar_id, _source)
-          GoogleCalendar::Result.new(@list_error ? nil : @existing, @list_error)
-        end
-
-        def upsert_source_event(_calendar_id, _source, existing_event_id, event)
-          @upserts << [existing_event_id, event]
-          GoogleCalendar::Result.new(@upsert_error ? nil : true, @upsert_error)
-        end
-      end
-
       def setup
         @calendar = FakeCalendar.new
       end
@@ -52,7 +29,7 @@ module NeedhamCircle
       end
 
       def test_updates_when_source_id_matches_existing
-        @calendar.existing = [SourceView.new("google-evt-7", "1")]
+        @calendar.existing = { "1" => "google-evt-7" }
         sync =
           build_sync(
             pages: [
@@ -216,10 +193,10 @@ module NeedhamCircle
 
       def build_sync(pages:)
         queue = pages.dup
-        Lwv.new(
+        Runner.new(
           calendar: @calendar,
           calendar_id: "events-cal-id",
-          fetch_page: ->(_page) { queue.shift }
+          fetcher: Lwv.new(fetch_page: ->(_page) { queue.shift })
         )
       end
 

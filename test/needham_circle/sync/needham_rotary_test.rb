@@ -5,29 +5,6 @@ require "test_helper"
 module NeedhamCircle
   module Sync
     class NeedhamRotaryTest < Minitest::Test
-      SourceView = Struct.new(:id, :source_id)
-
-      class FakeCalendar
-        attr_accessor :existing, :list_error, :upsert_error
-        attr_reader :upserts
-
-        def initialize
-          @existing = []
-          @list_error = nil
-          @upsert_error = nil
-          @upserts = []
-        end
-
-        def list_events_by_source(_calendar_id, _source)
-          GoogleCalendar::Result.new(@list_error ? nil : @existing, @list_error)
-        end
-
-        def upsert_source_event(_calendar_id, _source, existing_event_id, event)
-          @upserts << [existing_event_id, event]
-          GoogleCalendar::Result.new(@upsert_error ? nil : true, @upsert_error)
-        end
-      end
-
       UUID_A = "bf52954d-f0d3-4887-b7f8-b42f7bed496b"
       UUID_B = "78767a9f-c7a8-45ff-806a-e24718113ea3"
 
@@ -47,7 +24,7 @@ module NeedhamCircle
       end
 
       def test_updates_when_uuid_matches_existing
-        @calendar.existing = [SourceView.new("google-evt-1", UUID_A)]
+        @calendar.existing = { UUID_A => "google-evt-1" }
         sync = build_sync(events: [vevent(uid: UUID_A, summary: "Updated"), vevent(uid: UUID_B)])
 
         assert sync.call
@@ -78,13 +55,13 @@ module NeedhamCircle
       end
 
       def test_returns_false_when_fetch_yields_nil
-        sync = NeedhamRotary.new(calendar: @calendar, calendar_id: "events-cal-id", fetch: -> { nil }, now: @now)
+        sync = build_runner(NeedhamRotary.new(fetch: -> { nil }, now: @now))
         refute sync.call
         assert_empty @calendar.upserts
       end
 
       def test_returns_false_when_parse_yields_no_vcalendar
-        sync = NeedhamRotary.new(calendar: @calendar, calendar_id: "events-cal-id", fetch: -> { "not ics" }, now: @now)
+        sync = build_runner(NeedhamRotary.new(fetch: -> { "not ics" }, now: @now))
         refute sync.call
         assert_empty @calendar.upserts
       end
@@ -128,12 +105,11 @@ module NeedhamCircle
 
       def build_sync(events:)
         ics = build_ics(events)
-        NeedhamRotary.new(
-          calendar: @calendar,
-          calendar_id: "events-cal-id",
-          fetch: -> { ics },
-          now: @now
-        )
+        build_runner(NeedhamRotary.new(fetch: -> { ics }, now: @now))
+      end
+
+      def build_runner(fetcher)
+        Runner.new(calendar: @calendar, calendar_id: "events-cal-id", fetcher: fetcher)
       end
 
       def vevent(uid:, summary: "Event", description: "Update on all things library",

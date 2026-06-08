@@ -5,29 +5,6 @@ require "test_helper"
 module NeedhamCircle
   module Sync
     class NeedhamGovTest < Minitest::Test
-      SourceView = Struct.new(:id, :source_id)
-
-      class FakeCalendar
-        attr_accessor :existing, :list_error, :upsert_error
-        attr_reader :upserts
-
-        def initialize
-          @existing = []
-          @list_error = nil
-          @upsert_error = nil
-          @upserts = []
-        end
-
-        def list_events_by_source(_calendar_id, _source)
-          GoogleCalendar::Result.new(@list_error ? nil : @existing, @list_error)
-        end
-
-        def upsert_source_event(_calendar_id, _source, existing_event_id, event)
-          @upserts << [existing_event_id, event]
-          GoogleCalendar::Result.new(@upsert_error ? nil : true, @upsert_error)
-        end
-      end
-
       def setup
         @calendar = FakeCalendar.new
         @now = DateTime.new(2026, 5, 22, 12, 0, 0, "-04:00")
@@ -44,7 +21,7 @@ module NeedhamCircle
       end
 
       def test_updates_when_uid_matches_existing
-        @calendar.existing = [SourceView.new("google-evt-1", "27083")]
+        @calendar.existing = { "27083" => "google-evt-1" }
         sync = build_sync(events: [vevent(uid: "27083", summary: "Updated"), vevent(uid: "27397")])
 
         assert sync.call
@@ -81,13 +58,13 @@ module NeedhamCircle
       end
 
       def test_returns_false_when_fetch_yields_nil
-        sync = NeedhamGov.new(calendar: @calendar, calendar_id: "events-cal-id", fetch: -> { nil }, now: @now)
+        sync = build_runner(NeedhamGov.new(fetch: -> { nil }, now: @now))
         refute sync.call
         assert_empty @calendar.upserts
       end
 
       def test_returns_false_when_parse_fails
-        sync = NeedhamGov.new(calendar: @calendar, calendar_id: "events-cal-id", fetch: -> { "not ics" }, now: @now)
+        sync = build_runner(NeedhamGov.new(fetch: -> { "not ics" }, now: @now))
         refute sync.call
         assert_empty @calendar.upserts
       end
@@ -143,12 +120,11 @@ module NeedhamCircle
 
       def build_sync(events:)
         ics = build_ics(events)
-        NeedhamGov.new(
-          calendar: @calendar,
-          calendar_id: "events-cal-id",
-          fetch: -> { ics },
-          now: @now
-        )
+        build_runner(NeedhamGov.new(fetch: -> { ics }, now: @now))
+      end
+
+      def build_runner(fetcher)
+        Runner.new(calendar: @calendar, calendar_id: "events-cal-id", fetcher: fetcher)
       end
 
       def vevent(uid:, summary: "Event #{uid}", description: "", location: "Town Hall",

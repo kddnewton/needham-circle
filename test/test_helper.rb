@@ -6,6 +6,8 @@ require "needham_circle"
 require "minitest/autorun"
 require "rack/test"
 
+require "support/sync_calendar"
+
 NeedhamCircle::App.set :service_account_key, "fake-key"
 NeedhamCircle::App.set :events_calendar_id, "events-cal-id"
 NeedhamCircle::App.set :submissions_calendar_id, "submissions-cal-id"

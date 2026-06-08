@@ -7,7 +7,6 @@ require "uri"
 module NeedhamCircle
   module Sync
     class Lwv
-      SOURCE = Source::LWV
       ENDPOINT = "https://lwv-needham.org/wp-json/tribe/events/v1/events"
       PER_PAGE = 50
 
@@ -16,47 +15,19 @@ module NeedhamCircle
       # so we hand Google an IANA zone and let it apply DST correctly.
       TIMEZONE = "America/New_York"
 
-      #: (calendar: GoogleCalendar, calendar_id: String, ?fetch_page: ^(Integer) -> Hash[String, untyped]?, ?logger: Logger?) -> void
-      def initialize(calendar:, calendar_id:, fetch_page: nil, logger: nil)
-        @calendar = calendar
-        @calendar_id = calendar_id
+      #: (?fetch_page: ^(Integer) -> Hash[String, untyped]?, ?logger: Logger?) -> void
+      def initialize(fetch_page: nil, logger: nil)
         @fetch_page = fetch_page || method(:fetch_page_from_api)
         @logger = logger
       end
 
-      #: () -> bool
-      def call
-        result = @calendar.source_ids(@calendar_id, SOURCE.value)
-        if (error = result.error)
-          log("source_ids failed: #{error.class}: #{error.message}")
-          return false
-        end
-
-        existing_ids = result.value
-        events = fetch_all_events
-        return false if events.nil?
-
-        ok = true
-        events.each do |event|
-          result =
-            @calendar.upsert_source_event(
-              @calendar_id,
-              SOURCE.value,
-              existing_ids[event.source_id],
-              event
-            )
-          if (error = result.error)
-            ok = false
-            log("upsert failed for #{event.source_id}: #{error.class}: #{error.message}")
-          end
-        end
-        ok
+      #: () -> Source
+      def source
+        Source::LWV
       end
 
-      private
-
       #: () -> Array[Event]?
-      def fetch_all_events
+      def fetch_events
         events = []
         page = 1
         loop do
@@ -73,6 +44,8 @@ module NeedhamCircle
         end
         events
       end
+
+      private
 
       #: (Integer page) -> Hash[String, untyped]?
       def fetch_page_from_api(page)
