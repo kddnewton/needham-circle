@@ -170,8 +170,8 @@ module NeedhamCircle
       end
     end
 
-    #: (String calendar_id, String source) -> Result[Array[SourceEventView]]
-    def list_events_by_source(calendar_id, source)
+    #: (String calendar_id, String source) -> Result[Hash[String, String]]
+    def source_ids(calendar_id, source)
       Result.wrap do
         @service
           .list_events(
@@ -182,7 +182,10 @@ module NeedhamCircle
             max_results: 2500
           )
           .items
-          .map { |google_event| SourceEventView.new(google_event) }
+          .each_with_object({}) do |google_event, ids|
+            source_id = google_event.extended_properties&.private&.[]("source_id")
+            ids[source_id] = google_event.id if source_id
+          end
       end
     end
 

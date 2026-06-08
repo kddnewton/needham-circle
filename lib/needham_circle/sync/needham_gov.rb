@@ -32,17 +32,13 @@ module NeedhamCircle
 
       #: () -> bool
       def call
-        list_result = @calendar.list_events_by_source(@calendar_id, SOURCE.value)
-        if (error = list_result.error)
-          log("list_events_by_source failed: #{error.class}: #{error.message}")
+        result = @calendar.source_ids(@calendar_id, SOURCE.value)
+        if (error = result.error)
+          log("source_ids failed: #{error.class}: #{error.message}")
           return false
         end
 
-        existing_ids =
-          list_result.value.each_with_object({}) do |view, acc|
-            acc[view.source_id] = view.id if view.source_id
-          end
-
+        existing_ids = result.value
         events = fetch_events
         return false if events.nil?
 
