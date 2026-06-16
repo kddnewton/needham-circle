@@ -454,6 +454,15 @@ button[type="submit"]:active {
   font-weight: 500;
 }
 
+.submit-disclaimer {
+  display: block;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: var(--text-sm);
+  color: var(--navy);
+}
+
 @media (max-width: 480px) {
   .site-header {
     padding: 1.25rem 0;
