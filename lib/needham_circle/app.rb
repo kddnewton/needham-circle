@@ -118,6 +118,12 @@ module NeedhamCircle
       erb :events_list, layout: false
     end
 
+    get "/about" do
+      @page_title = "Needham Circle — About"
+      @page_description = "About Needham Circle."
+      erb :about
+    end
+
     get "/submit" do
       @page_title = "Needham Circle — Submit an Event"
       @page_description = "Submit a community event to the Needham Circle calendar."

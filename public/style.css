@@ -40,8 +40,7 @@ body {
 .site-header {
   background: var(--navy);
   color: var(--white);
-  padding: 1.5rem 0;
-  margin-bottom: 1.5rem;
+  padding: 0.75rem 0;
 }
 
 .site-header-inner {
@@ -72,6 +71,43 @@ body {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--sky);
+}
+
+.site-nav {
+  background-color: #e8e8e8;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.site-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1.75rem;
+}
+
+.site-nav a {
+  display: inline-block;
+  color: var(--navy);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.875rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.site-nav a:hover {
+  border-bottom-color: var(--mid);
+}
+
+.site-nav a[aria-current="page"] {
+  border-bottom-color: var(--navy);
+}
+
+.site-nav a:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
 }
 
 .visually-hidden {
@@ -116,24 +152,6 @@ a {
 
 a:hover {
   color: var(--mid);
-}
-
-.back-nav {
-  margin-bottom: 1rem;
-}
-
-.back-link {
-  display: inline-block;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: var(--mid);
-}
-
-.back-link:hover {
-  color: var(--navy);
 }
 
 .button {
@@ -268,7 +286,7 @@ a:hover {
 }
 
 .event-month-title {
-  background-color: #eee;
+  background-color: #e8e8e8;
   margin: 2rem calc(-1 * var(--pad)) 1.5rem;
   padding: 0.5rem 0.5rem 0.5rem calc(var(--pad) + 0.5rem);
   font-size: 1.25rem;
@@ -445,6 +463,13 @@ button[type="submit"]:active {
   }
   .site-header .tagline {
     font-size: 0.6875rem;
+  }
+  .site-nav ul {
+    gap: 0.875rem;
+  }
+  .site-nav a {
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
   }
   .filter-bar {
     flex-direction: column;

@@ -35,6 +35,14 @@
       </div>
     </header>
 
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="container">
+        <li><a href="/"<%== ' aria-current="page"' if request.path == "/" %>>Events</a></li>
+        <li><a href="/about"<%== ' aria-current="page"' if request.path == "/about" %>>About</a></li>
+        <li><a href="/submit"<%== ' aria-current="page"' if request.path == "/submit" %>>Submit</a></li>
+      </ul>
+    </nav>
+
     <div class="container">
       <main>
         <%== yield %>
