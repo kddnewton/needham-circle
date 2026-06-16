@@ -366,6 +366,13 @@ input[type="email"] {
   display: block;
 }
 
+input[type="datetime-local"] {
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+  min-height: calc(1.5em + 1.25rem + 4px);
+}
+
 .filter-search {
   padding-left: 2.5rem;
 }
