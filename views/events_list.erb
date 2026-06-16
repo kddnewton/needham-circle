@@ -9,7 +9,7 @@
       <ul class="events">
         <% events.each do |event| %>
           <li>
-            <time class="event-time" datetime="<%= event.iso8601 %>"><%= event.formatted_starts_at %></time>
+            <time class="event-time" datetime="<%= event.iso8601 %>"><%= event.formatted_starts_at %><% if (ends_at = event.formatted_ends_at) %> &ndash; <%= ends_at %><% end %></time>
             <h3 class="event-title">
               <% if event.url %>
                 <a href="<%= event.url %>" target="_blank" rel="noopener noreferrer"><%= event.title %></a>

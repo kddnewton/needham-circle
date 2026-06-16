@@ -55,6 +55,11 @@ module NeedhamCircle
         @formatter.formatted_starts_at(@event)
       end
 
+      #: () -> String?
+      def formatted_ends_at
+        @formatter.formatted_ends_at(@event)
+      end
+
       #: () -> String
       def formatted_month
         @formatter.formatted_month(@event)
@@ -62,6 +67,8 @@ module NeedhamCircle
     end
 
     class EventDateTimeFormatter
+      LONG_FORMAT = "%A, %B %-d at %-l:%M %p"
+
       #: (Google::Apis::CalendarV3::Event event) -> String
       def iso8601(event)
         event.start.date_time.iso8601
@@ -69,7 +76,18 @@ module NeedhamCircle
 
       #: (Google::Apis::CalendarV3::Event event) -> String
       def formatted_starts_at(event)
-        event.start.date_time.strftime("%A, %B %-d at %-l:%M %p")
+        event.start.date_time.strftime(LONG_FORMAT)
+      end
+
+      #: (Google::Apis::CalendarV3::Event event) -> String
+      def formatted_ends_at(event)
+        ends = event.end.date_time
+
+        if ends.to_date == event.start.date_time.to_date
+          ends.strftime("%-l:%M %p")
+        else
+          ends.strftime(LONG_FORMAT)
+        end
       end
 
       #: (Google::Apis::CalendarV3::Event event) -> String
@@ -79,6 +97,8 @@ module NeedhamCircle
     end
 
     class EventDateFormatter
+      LONG_FORMAT = "%A, %B %-d"
+
       #: (Google::Apis::CalendarV3::Event event) -> String
       def iso8601(event)
         event.start.date.iso8601
@@ -86,7 +106,17 @@ module NeedhamCircle
 
       #: (Google::Apis::CalendarV3::Event event) -> String
       def formatted_starts_at(event)
-        event.start.date.strftime("%A, %B %-d")
+        event.start.date.strftime(LONG_FORMAT)
+      end
+
+      #: (Google::Apis::CalendarV3::Event event) -> String?
+      def formatted_ends_at(event)
+        # Google Calendar all-day end dates are exclusive, so the inclusive
+        # last day is the day before. A single-day event has no end to show.
+        inclusive_end = event.end.date - 1
+        return if inclusive_end <= event.start.date
+
+        inclusive_end.strftime(LONG_FORMAT)
       end
 
       #: (Google::Apis::CalendarV3::Event event) -> String
