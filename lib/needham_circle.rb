@@ -21,6 +21,7 @@ require "needham_circle/sync/runner"
 require "needham_circle/sync/lets_bike"
 require "needham_circle/sync/lwv"
 require "needham_circle/sync/needham_gov"
+require "needham_circle/sync/needham_observer"
 require "needham_circle/sync/needham_rotary"
 
 require "needham_circle/app"
