@@ -452,6 +452,20 @@ button[type="submit"]:active {
   .filter-submit {
     justify-content: center;
   }
+  .filter-sources {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    /* Keep the first chip aligned with the rest of the content, but bleed the
+       row off the right card edge and fade it to signal there's more. */
+    margin-right: calc(-1 * var(--pad));
+    padding-right: var(--pad);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  }
+  .filter-chip {
+    scroll-snap-align: start;
+  }
   main {
     --pad: 1.25rem;
     border-radius: 10px;
