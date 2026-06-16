@@ -21,6 +21,15 @@
     </div>
 
     <div class="field">
+      <label for="contact">Contact</label>
+      <input id="contact" type="email" name="contact" required maxlength="200" value="<%= @event.value_for(:contact) %>">
+      <small class="field-hint">An email address so our moderators can reach you about your event. It is not shown publicly.</small>
+      <% @event.errors_for(:contact).each do |error| %>
+        <span class="field-error"><%= error %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
       <label for="start_time">Start</label>
       <input id="start_time" type="datetime-local" name="start_time" required value="<%= @event.value_for(:start_time) %>">
       <% @event.errors_for(:start_time).each do |error| %>

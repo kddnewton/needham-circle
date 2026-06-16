@@ -94,7 +94,8 @@ module NeedhamCircle
         "description" => "Discuss things",
         "location" => "Town Hall",
         "start_time" => future_local(1),
-        "end_time" => future_local(3)
+        "end_time" => future_local(3),
+        "contact" => "organizer@example.com"
       )
 
       assert_equal 200, last_response.status
@@ -103,6 +104,19 @@ module NeedhamCircle
       calendar_id, form = @fake_calendar.created.first
       assert_equal "submissions-cal-id", calendar_id
       assert_equal "Town Meeting", form.coerced_for(:title)
+      assert_equal "organizer@example.com", form.coerced_for(:contact)
+    end
+
+    def test_submission_requires_a_valid_contact_email
+      submit(
+        "title" => "No Contact",
+        "start_time" => future_local(1),
+        "end_time" => future_local(3),
+        "contact" => "not-an-email"
+      )
+
+      assert_includes last_response.body, "Contact must be a valid email address."
+      assert_empty @fake_calendar.created
     end
 
     def test_invalid_submission_shows_field_errors_and_does_not_create

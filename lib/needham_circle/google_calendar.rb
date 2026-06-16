@@ -169,7 +169,7 @@ module NeedhamCircle
         google_event =
           Google::Apis::CalendarV3::Event.new(
             summary: event_form.coerced_for(:title),
-            description: event_form.coerced_for(:description),
+            description: submission_description(event_form),
             location: event_form.coerced_for(:location),
             start: event_date_time(event_form.coerced_for(:start_time)),
             end: event_date_time(event_form.coerced_for(:end_time))
@@ -243,6 +243,17 @@ module NeedhamCircle
     end
 
     private
+
+    # The submitter's contact email is for moderators reviewing the submission,
+    # not the public events list (which never renders the description), so it
+    # rides along in the description where it shows in the Google Calendar UI
+    # during approval.
+    #: (EventForm event_form) -> String
+    def submission_description(event_form)
+      description = event_form.coerced_for(:description)
+      contact = "Contact: #{event_form.coerced_for(:contact)}"
+      description.empty? ? contact : "#{description}\n\n#{contact}"
+    end
 
     #: (Time time) -> Google::Apis::CalendarV3::EventDateTime
     def event_date_time(time)

@@ -314,6 +314,7 @@ form label {
 input[type="text"],
 input[type="datetime-local"],
 input[type="url"],
+input[type="email"],
 .filter-search,
 textarea {
   display: block;
@@ -327,7 +328,8 @@ textarea {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-input[type="url"] {
+input[type="url"],
+input[type="email"] {
   display: block;
 }
 
@@ -394,6 +396,13 @@ button[type="submit"]:active {
   font-size: 0.8125rem;
   margin-top: 0.4rem;
   font-weight: 500;
+}
+
+.field-hint {
+  display: block;
+  color: var(--mid);
+  font-size: 0.8125rem;
+  margin-top: 0.4rem;
 }
 
 .thanks {

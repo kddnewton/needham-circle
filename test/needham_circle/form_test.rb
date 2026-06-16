@@ -60,6 +60,34 @@ module NeedhamCircle
       assert_nil field.validate(Time.now + 3600)
     end
 
+    def test_email_field_strips_whitespace
+      field = Form::EmailField.new(:e, "Email")
+      assert_equal "a@b.com", field.coerce("  a@b.com  ")
+    end
+
+    def test_email_field_required_rejects_empty
+      field = Form::EmailField.new(:e, "Email", required: true)
+      assert_equal "Email is required.", field.validate("")
+      assert_nil field.validate("a@b.com")
+    end
+
+    def test_email_field_rejects_malformed_address
+      field = Form::EmailField.new(:e, "Email")
+      assert_equal "Email must be a valid email address.", field.validate("not-an-email")
+      assert_equal "Email must be a valid email address.", field.validate("missing-domain@")
+      assert_nil field.validate("a@b.com")
+    end
+
+    def test_email_field_allows_blank_when_not_required
+      field = Form::EmailField.new(:e, "Email")
+      assert_nil field.validate("")
+    end
+
+    def test_email_field_enforces_max_length
+      field = Form::EmailField.new(:e, "Email", max_length: 7)
+      assert_equal "Email must be at most 7 characters.", field.validate("a@b.com1")
+    end
+
     def test_form_skips_validation_when_constructed_without_params
       form = TestForm.new
       assert form.valid?
