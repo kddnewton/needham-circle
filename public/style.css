@@ -88,9 +88,10 @@ body {
 }
 
 main {
+  --pad: 2rem;
   background: var(--white);
   border-radius: 14px;
-  padding: 2rem;
+  padding: var(--pad);
   box-shadow: 0 6px 20px rgba(28, 71, 142, 0.10);
   margin-bottom: 2.5rem;
 }
@@ -268,8 +269,8 @@ a:hover {
 
 .event-month-title {
   background-color: #eee;
-  margin: 2rem -2.0rem 1.5rem -2.0rem;
-  padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+  margin: 2rem calc(-1 * var(--pad)) 1.5rem;
+  padding: 0.5rem 0.5rem 0.5rem calc(var(--pad) + 0.5rem);
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--navy);
@@ -452,7 +453,7 @@ button[type="submit"]:active {
     justify-content: center;
   }
   main {
-    padding: 1.25rem;
+    --pad: 1.25rem;
     border-radius: 10px;
   }
 }
