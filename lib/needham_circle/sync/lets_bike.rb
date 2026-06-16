@@ -61,7 +61,7 @@ module NeedhamCircle
         Event.new(
           source_id: raw.fetch("id").to_s,
           title: raw["title"].to_s,
-          description: clean_description(raw["body"]),
+          description: Sync.html_to_text(raw["body"]),
           location: format_location(raw["location"]),
           url: full_url(raw["fullUrl"]),
           start_at: ms_to_iso(raw["startDate"]),
@@ -74,12 +74,6 @@ module NeedhamCircle
       def ms_to_iso(ms)
         return nil if ms.nil?
         Time.at(ms / 1000.0).utc.strftime("%Y-%m-%dT%H:%M:%SZ")
-      end
-
-      #: (String? html) -> String
-      def clean_description(html)
-        return "" if html.nil? || html.empty?
-        html.gsub(/<[^>]+>/, "").gsub(/\s+/, " ").strip
       end
 
       #: (Hash[String, untyped]? location) -> String

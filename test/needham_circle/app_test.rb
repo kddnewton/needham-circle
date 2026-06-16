@@ -199,5 +199,25 @@ module NeedhamCircle
     def future_local(hours_ahead)
       (Time.now + hours_ahead * 3600).strftime("%Y-%m-%dT%H:%M")
     end
+
+    def event_view(summary:, location: nil, description: nil, contact: nil)
+      google_event =
+        Google::Apis::CalendarV3::Event.new(
+          summary: summary,
+          location: location,
+          description: description,
+          start: Google::Apis::CalendarV3::EventDateTime.new(date_time: Time.now + 86_400),
+          end: Google::Apis::CalendarV3::EventDateTime.new(date_time: Time.now + 90_000)
+        )
+
+      if contact
+        google_event.extended_properties =
+          Google::Apis::CalendarV3::Event::ExtendedProperties.new(
+            private: { "contact" => contact }
+          )
+      end
+
+      GoogleCalendar::EventView.new(google_event, GoogleCalendar::EventDateTimeFormatter.new)
+    end
   end
 end

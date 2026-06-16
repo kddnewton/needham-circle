@@ -34,6 +34,16 @@ module NeedhamCircle
       end
 
       #: () -> String?
+      def location
+        @event.location
+      end
+
+      #: () -> String?
+      def description
+        @event.description
+      end
+
+      #: () -> String?
       def source
         @event.extended_properties&.private&.[]("source")
       end
@@ -169,10 +179,17 @@ module NeedhamCircle
         google_event =
           Google::Apis::CalendarV3::Event.new(
             summary: event_form.coerced_for(:title),
-            description: submission_description(event_form),
+            description: event_form.coerced_for(:description),
             location: event_form.coerced_for(:location),
             start: event_date_time(event_form.coerced_for(:start_time)),
-            end: event_date_time(event_form.coerced_for(:end_time))
+            end: event_date_time(event_form.coerced_for(:end_time)),
+            # The submitter's contact email is moderator-only metadata, kept in a
+            # private extended property so it never surfaces in the description
+            # the public events list now renders.
+            extended_properties:
+              Google::Apis::CalendarV3::Event::ExtendedProperties.new(
+                private: { "contact" => event_form.coerced_for(:contact) }
+              )
           )
 
         # Google rejects Event::Source with a blank url. Only attach the source
@@ -243,17 +260,6 @@ module NeedhamCircle
     end
 
     private
-
-    # The submitter's contact email is for moderators reviewing the submission,
-    # not the public events list (which never renders the description), so it
-    # rides along in the description where it shows in the Google Calendar UI
-    # during approval.
-    #: (EventForm event_form) -> String
-    def submission_description(event_form)
-      description = event_form.coerced_for(:description)
-      contact = "Contact: #{event_form.coerced_for(:contact)}"
-      description.empty? ? contact : "#{description}\n\n#{contact}"
-    end
 
     #: (Time time) -> Google::Apis::CalendarV3::EventDateTime
     def event_date_time(time)

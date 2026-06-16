@@ -105,7 +105,7 @@ module NeedhamCircle
           )
 
         assert sync.call
-        assert_equal "Hello world More", @calendar.upserts[0][1].description
+        assert_equal "Hello world\nMore", @calendar.upserts[0][1].description
       end
 
       def test_formats_venue_address

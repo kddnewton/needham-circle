@@ -292,6 +292,20 @@ a:hover {
   color: var(--navy);
 }
 
+.event-location {
+  margin: 0.375rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--mid);
+}
+
+.event-description {
+  margin: 0.5rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--navy);
+  white-space: pre-line;
+}
+
 .empty-state {
   color: var(--mid);
   font-style: italic;

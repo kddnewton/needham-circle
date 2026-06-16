@@ -17,6 +17,9 @@
                 <%= event.title %>
               <% end %>
             </h3>
+            <% if (location = event.location) && !location.empty? %>
+              <p class="event-location"><%= location %></p>
+            <% end %>
           </li>
         <% end %>
       </ul>

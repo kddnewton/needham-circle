@@ -75,19 +75,13 @@ module NeedhamCircle
         Event.new(
           source_id: raw.fetch("id").to_s,
           title: raw["title"].to_s,
-          description: clean_description(raw["description"]),
+          description: Sync.html_to_text(raw["description"]),
           location: format_location(raw["venue"]),
           url: raw["url"].to_s,
           start_at: format_time(raw["start_date"]),
           end_at: format_time(raw["end_date"]),
           timezone: TIMEZONE
         )
-      end
-
-      #: (String? html) -> String
-      def clean_description(html)
-        return "" if html.nil? || html.empty?
-        html.gsub(/<[^>]+>/, "").gsub(/\s+/, " ").strip
       end
 
       #: (Hash[String, untyped]? venue) -> String
