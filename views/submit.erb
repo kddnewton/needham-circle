@@ -61,6 +61,7 @@
         value="<%= @event.value_for(:url) %>"
         pattern="https://.*"
       >
+      <small class="field-hint">The link to the event's page. It must start with https://.</small>
       <% @event.errors_for(:url).each do |error| %>
         <span class="field-error"><%= error %></span>
       <% end %>
