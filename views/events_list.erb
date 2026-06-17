@@ -4,8 +4,11 @@
   <p class="empty-state">No upcoming events.</p>
 <% else %>
   <% @events.group_by(&:formatted_month).each do |month, events| %>
-    <section class="event-month">
-      <h3 class="event-month-title"><%= month %></h3>
+    <details class="event-month" open>
+      <summary class="event-month-title">
+        <h3><%= month %></h3>
+        <span class="event-month-toggle" aria-hidden="true"></span>
+      </summary>
       <ul class="events">
         <% events.each do |event| %>
           <li>
@@ -23,6 +26,6 @@
           </li>
         <% end %>
       </ul>
-    </section>
+    </details>
   <% end %>
 <% end %>
