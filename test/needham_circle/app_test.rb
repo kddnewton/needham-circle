@@ -75,6 +75,28 @@ module NeedhamCircle
       assert_includes last_response.body, "trouble loading events"
     end
 
+    def test_index_renders_source_filter_with_nothing_selected
+      get "/"
+      assert_equal 200, last_response.status
+      # Every source is an option in the dropdown.
+      assert_includes last_response.body, "League of Women Voters"
+      assert_includes last_response.body, "Needham Observer"
+      # With no selection, the count badge and applied-chips row are hidden.
+      assert_includes last_response.body, "data-source-count hidden"
+      assert_includes last_response.body, "data-applied hidden"
+    end
+
+    def test_index_marks_selected_source_and_shows_applied_chip
+      get "/", { "source" => "lwv" }
+      assert_equal 200, last_response.status
+      # The matching dropdown option is checked.
+      assert_match(/data-source="lwv"[^>]*aria-checked="true"/, last_response.body)
+      # The applied-chips row is shown (not hidden) with a removable chip.
+      assert_includes last_response.body, "data-applied>"
+      assert_includes last_response.body, "Remove League of Women Voters filter"
+      refute_includes last_response.body, "data-source-count hidden"
+    end
+
     def test_submit_page_renders_form_with_csrf_token
       get "/submit"
       assert_equal 200, last_response.status

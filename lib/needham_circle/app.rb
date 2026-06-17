@@ -35,26 +35,40 @@ module NeedhamCircle
         coerced_for(:q)
       end
 
-      #: () -> Array[String]
+      #: () -> Array[Source]
       def selected_sources
-        coerced_for(:source)
+        coerced = coerced_for(:source)
+        Source::ALL.select { |source| coerced.include?(source.slug) }
       end
 
-      #: (String slug) -> bool
-      def selected?(slug)
-        selected_sources.include?(slug)
-      end
-
-      #: () -> Array[String?]
-      def selected_values
-        Source::ALL.select { |source| selected?(source.slug) }.map(&:value)
+      #: () -> Integer
+      def selected_sources_size
+        coerced_for(:source).size
       end
 
       #: (String slug) -> String
       def toggle_url(slug)
-        slugs = selected_sources
+        slugs = coerced_for(:source)
         slugs = slugs.include?(slug) ? slugs - [slug] : slugs + [slug]
+        filter_url(slugs)
+      end
 
+      #: () -> String
+      def select_all_url
+        filter_url(Source::ALL.map(&:slug))
+      end
+
+      #: () -> String
+      def clear_sources_url
+        filter_url([])
+      end
+
+      private
+
+      # Builds a "/" URL for the given source selection, preserving the current
+      # search query. The source param is comma-joined (see MultiSelectField).
+      #: (Array[String] slugs) -> String
+      def filter_url(slugs)
         query_params = {}
         query_params["source"] = slugs.join(",") unless slugs.empty?
 
@@ -95,7 +109,7 @@ module NeedhamCircle
           return nil
         end
 
-        values = filter.selected_values
+        values = filter.selected_sources.map(&:value)
         return result.value if values.empty?
 
         result.value.select do |event|

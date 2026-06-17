@@ -188,44 +188,176 @@ a:hover {
   margin-bottom: 1.5rem;
 }
 
-.filter-sources {
+/* Sources filter: a native <details> popover so it works without JS. */
+.source-filter {
+  position: relative;
+}
+
+.source-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  list-style: none;
+  cursor: pointer;
+  white-space: nowrap;
+  height: 100%;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--navy);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: border-color 0.15s ease;
+}
+
+.source-filter-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.source-filter-trigger:hover,
+.source-filter[open] .source-filter-trigger {
+  border-color: var(--mid);
+}
+
+.source-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--navy);
+  color: var(--white);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.source-filter-count[hidden] {
+  display: none;
+}
+
+.source-filter-caret {
+  width: 0.7rem;
+  height: 0.7rem;
+  background-color: var(--navy);
+  mask: url("/caret.svg") no-repeat center / contain;
+  transition: transform 0.15s ease;
+}
+
+.source-filter[open] .source-filter-caret {
+  transform: rotate(180deg);
+}
+
+.source-filter-menu {
+  position: absolute;
+  right: 0;
+  z-index: 20;
+  margin-top: 0.4rem;
+  min-width: 13rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(28, 71, 142, 0.12);
+  overflow: hidden;
+}
+
+.source-filter-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem;
+}
+
+.source-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  color: var(--navy);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.source-option:hover {
+  background: var(--paper);
+}
+
+.source-option::before {
+  content: "";
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  background: var(--white) no-repeat center / 0.65rem;
+}
+
+.source-option[aria-checked="true"]::before {
+  border-color: var(--navy);
+  background-color: var(--navy);
+  background-image: url("/check.svg");
+}
+
+.source-filter-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border-top: 1px solid var(--border);
+}
+
+.source-filter-actions a {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--navy);
+}
+
+.source-filter-actions a:hover {
+  color: var(--mid);
+}
+
+.applied-filters {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
 }
 
-.filter-chip {
+.applied-filters[hidden] {
+  display: none;
+}
+
+.applied-chip {
   display: inline-flex;
   align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.5rem 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: var(--navy);
+  color: var(--white);
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1;
-  letter-spacing: 0.02em;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--paper);
-  color: var(--navy);
   text-decoration: none;
   white-space: nowrap;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.filter-chip:hover {
-  border-color: var(--mid);
-  background: var(--white);
-}
-
-.filter-chip.is-active {
-  background: var(--navy);
-  border-color: var(--navy);
+.applied-chip:hover {
+  background: var(--mid);
   color: var(--white);
-  box-shadow: 0 1px 3px rgba(28, 71, 142, 0.25);
 }
 
-.filter-chip.is-active:hover {
-  background: var(--navy);
+.applied-chip-x {
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .filter-bar {
@@ -361,6 +493,67 @@ a:hover {
 .empty-state {
   color: var(--mid);
   font-style: italic;
+}
+
+/* While a filtered list is being fetched, the results are swapped for these
+   placeholder rows that mirror the events layout (month bar + time/title/
+   location lines), so the wait shows the shape of what's coming. */
+.skeleton-month {
+  height: 2.75rem;
+  margin: 0 calc(-1 * var(--pad)) 1.5rem;
+  background-color: #e8e8e8;
+}
+
+.skeleton-event {
+  padding: 1.125rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.skeleton-event:first-of-type {
+  padding-top: 0;
+}
+
+.skeleton-line {
+  display: block;
+  height: 0.9rem;
+  border-radius: 4px;
+}
+
+.skeleton-time {
+  width: 9rem;
+  height: 0.7rem;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-title {
+  width: 65%;
+  margin-bottom: 0.45rem;
+}
+
+.skeleton-loc {
+  width: 40%;
+  height: 0.7rem;
+}
+
+.skeleton-line {
+  background: linear-gradient(90deg, var(--border) 25%, var(--paper) 37%, var(--border) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line {
+    animation: none;
+  }
 }
 
 form .field {
@@ -523,22 +716,17 @@ button[type="submit"]:active {
   .filter-bar {
     flex-direction: column;
   }
-  .filter-submit {
-    justify-content: center;
+  /* Full-width trigger and menu so the dropdown is easy to tap. */
+  .source-filter {
+    width: 100%;
   }
-  .filter-sources {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-    /* Keep the first chip aligned with the rest of the content, but bleed the
-       row off the right card edge and fade it to signal there's more. */
-    margin-right: calc(-1 * var(--pad));
-    padding-right: var(--pad);
-    mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  .source-filter-trigger {
+    width: 100%;
+    justify-content: space-between;
   }
-  .filter-chip {
-    scroll-snap-align: start;
+  .source-filter-menu {
+    left: 0;
+    right: 0;
   }
   main {
     --pad: 1.25rem;

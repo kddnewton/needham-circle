@@ -1,6 +1,8 @@
-// Progressive enhancement for the event filters. Without this script the chip
-// links and the search form navigate normally; with it, filtering happens via
-// AJAX against /events and the URL is kept in sync so views stay shareable.
+// Progressive enhancement for the event filters. Without this script every
+// control is a real link/form that navigates normally; with it, filtering
+// happens via AJAX against /events and the URL is kept in sync so views stay
+// shareable. The filter controls live outside [data-events], so this script
+// updates the count badge and applied-chips row itself after each change.
 (function () {
   "use strict";
 
@@ -8,30 +10,77 @@
   var results = document.querySelector("[data-events]");
   if (!filters || !results) return;
 
-  var chips = filters.querySelectorAll("[data-source]");
+  var dropdown = filters.querySelector("[data-source-filter]");
+  var options = Array.prototype.slice.call(filters.querySelectorAll(".source-option"));
+  var badge = filters.querySelector("[data-source-count]");
+  var applied = filters.querySelector("[data-applied]");
   var search = filters.querySelector("[data-search]");
+  var skeleton = document.querySelector("[data-skeleton]");
   var searchTimer = null;
 
-  // Builds the query string from the current chip/search state.
+  // The source options whose aria-checked is currently "true".
+  function selected() {
+    return options.filter(function (option) {
+      return option.getAttribute("aria-checked") === "true";
+    });
+  }
+
+  function setChecked(option, value) {
+    option.setAttribute("aria-checked", value ? "true" : "false");
+  }
+
+  // Builds the query string from the current selection and search state.
   function queryString() {
     var params = new URLSearchParams();
 
-    var sources = [];
-    chips.forEach(function (chip) {
-      if (chip.getAttribute("aria-pressed") === "true") {
-        sources.push(chip.dataset.source);
-      }
+    var slugs = selected().map(function (option) {
+      return option.dataset.source;
     });
-    if (sources.length) params.set("source", sources.join(","));
+    if (slugs.length) params.set("source", slugs.join(","));
 
     if (search && search.value.trim()) params.set("q", search.value.trim());
 
     return params.toString();
   }
 
+  // Reflects the current selection onto the count badge and the applied-chips
+  // row (both live outside the AJAX-swapped results region).
+  function render() {
+    var chosen = selected();
+
+    if (badge) {
+      badge.textContent = String(chosen.length);
+      badge.hidden = chosen.length === 0;
+    }
+
+    if (applied) {
+      applied.querySelectorAll(".applied-chip").forEach(function (chip) {
+        chip.remove();
+      });
+      chosen.forEach(function (option) {
+        var chip = document.createElement("a");
+        chip.className = "applied-chip";
+        chip.href = "#";
+        chip.dataset.source = option.dataset.source;
+        chip.setAttribute("aria-label", "Remove " + option.dataset.label + " filter");
+        chip.innerHTML =
+          option.dataset.label +
+          '<span class="applied-chip-x" aria-hidden="true">×</span>';
+        applied.appendChild(chip);
+      });
+      applied.hidden = chosen.length === 0;
+    }
+  }
+
   // Fetches the filtered list fragment and swaps it into the results region.
+  // The fetch hits the calendar API server-side, so show skeleton placeholders
+  // that mirror the events layout while it's in flight. On a network error,
+  // restore the previous list rather than leaving the skeleton up.
   function refresh() {
     var qs = queryString();
+    var previous = results.innerHTML;
+    if (skeleton) results.innerHTML = skeleton.innerHTML;
+    results.setAttribute("aria-busy", "true");
     fetch("/events" + (qs ? "?" + qs : ""), {
       headers: { "X-Requested-With": "fetch" }
     })
@@ -40,6 +89,12 @@
       })
       .then(function (html) {
         results.innerHTML = html;
+      })
+      .catch(function () {
+        results.innerHTML = previous;
+      })
+      .then(function () {
+        results.removeAttribute("aria-busy");
       });
   }
 
@@ -48,30 +103,66 @@
   function apply() {
     var qs = queryString();
     history.pushState(null, "", qs ? "/?" + qs : "/");
+    render();
     refresh();
   }
 
-  // Reflects the current URL onto the chips and search box (used on popstate).
+  // Reflects the current URL onto the options and search box (used on popstate).
   function syncFromUrl() {
     var params = new URLSearchParams(window.location.search);
-    var sources = (params.get("source") || "").split(",");
-    chips.forEach(function (chip) {
-      var active = sources.indexOf(chip.dataset.source) !== -1;
-      chip.setAttribute("aria-pressed", active ? "true" : "false");
-      chip.classList.toggle("is-active", active);
+    var slugs = (params.get("source") || "").split(",");
+    options.forEach(function (option) {
+      setChecked(option, slugs.indexOf(option.dataset.source) !== -1);
     });
     if (search) search.value = params.get("q") || "";
+    render();
   }
 
-  chips.forEach(function (chip) {
-    chip.addEventListener("click", function (event) {
+  // Toggle a source from within the dropdown.
+  options.forEach(function (option) {
+    option.addEventListener("click", function (event) {
       event.preventDefault();
-      var active = chip.getAttribute("aria-pressed") === "true";
-      chip.setAttribute("aria-pressed", active ? "false" : "true");
-      chip.classList.toggle("is-active", !active);
+      setChecked(option, option.getAttribute("aria-checked") !== "true");
       apply();
     });
   });
+
+  // Applied chips are rebuilt on every render, so handle their clicks via
+  // delegation on the stable container.
+  if (applied) {
+    applied.addEventListener("click", function (event) {
+      var chip = event.target.closest(".applied-chip");
+      if (chip) {
+        event.preventDefault();
+        options.forEach(function (option) {
+          if (option.dataset.source === chip.dataset.source) setChecked(option, false);
+        });
+        apply();
+      }
+    });
+  }
+
+  var selectAll = filters.querySelector("[data-select-all]");
+  if (selectAll) {
+    selectAll.addEventListener("click", function (event) {
+      event.preventDefault();
+      options.forEach(function (option) {
+        setChecked(option, true);
+      });
+      apply();
+    });
+  }
+
+  var clearSources = filters.querySelector("[data-clear-sources]");
+  if (clearSources) {
+    clearSources.addEventListener("click", function (event) {
+      event.preventDefault();
+      options.forEach(function (option) {
+        setChecked(option, false);
+      });
+      apply();
+    });
+  }
 
   if (search) {
     search.addEventListener("input", function () {
@@ -86,6 +177,17 @@
       event.preventDefault();
       window.clearTimeout(searchTimer);
       apply();
+    });
+  }
+
+  // Close the dropdown on an outside click or Escape (native <details> only
+  // closes via its own summary otherwise).
+  if (dropdown) {
+    document.addEventListener("click", function (event) {
+      if (dropdown.open && !dropdown.contains(event.target)) dropdown.open = false;
+    });
+    dropdown.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") dropdown.open = false;
     });
   }
 

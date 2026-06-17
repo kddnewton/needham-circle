@@ -3,8 +3,8 @@
 <div class="event-filters" data-filters>
   <div class="filter-bar">
     <form class="filter-search-form" method="get" action="/">
-      <% unless @filter.selected_sources.empty? %>
-        <input type="hidden" name="source" value="<%= @filter.selected_sources.join(",") %>">
+      <% unless @filter.coerced_for(:source).empty? %>
+        <input type="hidden" name="source" value="<%= @filter.coerced_for(:source).join(",") %>">
       <% end %>
       <input
         class="filter-search"
@@ -16,17 +16,44 @@
         data-search
       >
     </form>
+
+    <details class="source-filter" data-source-filter>
+      <summary class="source-filter-trigger">
+        Sources<span class="source-filter-count" data-source-count<%= " hidden" if @filter.selected_sources_size.zero? %>><%= @filter.selected_sources_size %></span>
+        <span class="source-filter-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="source-filter-menu">
+        <ul class="source-filter-list">
+          <% @filter.sources.each do |source| %>
+            <% active = @filter.coerced_for(:source).include?(source.slug) %>
+            <li>
+              <a
+                class="source-option"
+                href="<%= @filter.toggle_url(source.slug) %>"
+                data-source="<%= source.slug %>"
+                data-label="<%= source.label %>"
+                role="checkbox"
+                aria-checked="<%= active %>"
+              ><%= source.label %></a>
+            </li>
+          <% end %>
+        </ul>
+        <div class="source-filter-actions">
+          <a href="<%= @filter.select_all_url %>" data-select-all>Select all</a>
+          <a href="<%= @filter.clear_sources_url %>" data-clear-sources>Clear</a>
+        </div>
+      </div>
+    </details>
   </div>
 
-  <div class="filter-sources">
-    <% @filter.sources.each do |source| %>
-      <% active = @filter.selected?(source.slug) %>
+  <div class="applied-filters" data-applied<%= " hidden" if @filter.selected_sources_size.zero? %>>
+    <% @filter.selected_sources.each do |source| %>
       <a
-        class="filter-chip<%= " is-active" if active %>"
+        class="applied-chip"
         href="<%= @filter.toggle_url(source.slug) %>"
         data-source="<%= source.slug %>"
-        aria-pressed="<%= active %>"
-      ><%= source.label %></a>
+        aria-label="Remove <%= source.label %> filter"
+      ><%= source.label %><span class="applied-chip-x" aria-hidden="true">&times;</span></a>
     <% end %>
   </div>
 </div>
@@ -34,5 +61,18 @@
 <div data-events>
   <%== erb :events_list, layout: false %>
 </div>
+
+<template data-skeleton>
+  <div class="events-skeleton" aria-hidden="true">
+    <div class="skeleton-month"></div>
+    <% 4.times do %>
+      <div class="skeleton-event">
+        <span class="skeleton-line skeleton-time"></span>
+        <span class="skeleton-line skeleton-title"></span>
+        <span class="skeleton-line skeleton-loc"></span>
+      </div>
+    <% end %>
+  </div>
+</template>
 
 <script src="/filters.js" defer></script>
