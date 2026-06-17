@@ -556,6 +556,11 @@ a:hover {
   }
 }
 
+.required-marker {
+  color: var(--error);
+  font-weight: 700;
+}
+
 form .field {
   margin-bottom: 1.25rem;
 }

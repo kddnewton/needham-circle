@@ -11,7 +11,7 @@
     <input type="hidden" name="authenticity_token" value="<%= session[:csrf] %>">
 
     <div class="field">
-      <label for="title">Title</label>
+      <label for="title">Title <span class="required-marker" aria-hidden="true">*</span></label>
       <input id="title" type="text" name="title" required maxlength="200" value="<%= @event.value_for(:title) %>">
       <% @event.errors_for(:title).each do |error| %>
         <span class="field-error"><%= error %></span>
@@ -19,7 +19,7 @@
     </div>
 
     <div class="field">
-      <label for="email">Email</label>
+      <label for="email">Email <span class="required-marker" aria-hidden="true">*</span></label>
       <input id="email" type="email" name="email" required maxlength="200" value="<%= @event.value_for(:email) %>">
       <small class="field-hint">An email address so our moderators can reach you about your event. It is not shown publicly.</small>
       <% @event.errors_for(:email).each do |error| %>
@@ -28,7 +28,7 @@
     </div>
 
     <div class="field">
-      <label for="start_time">Start</label>
+      <label for="start_time">Start <span class="required-marker" aria-hidden="true">*</span></label>
       <input id="start_time" type="datetime-local" name="start_time" required value="<%= @event.value_for(:start_time) %>">
       <% @event.errors_for(:start_time).each do |error| %>
         <span class="field-error"><%= error %></span>
@@ -36,7 +36,7 @@
     </div>
 
     <div class="field">
-      <label for="end_time">End</label>
+      <label for="end_time">End <span class="required-marker" aria-hidden="true">*</span></label>
       <input id="end_time" type="datetime-local" name="end_time" required value="<%= @event.value_for(:end_time) %>">
       <% @event.errors_for(:end_time).each do |error| %>
         <span class="field-error"><%= error %></span>
