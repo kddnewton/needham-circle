@@ -188,7 +188,7 @@ module NeedhamCircle
             # the public events list now renders.
             extended_properties:
               Google::Apis::CalendarV3::Event::ExtendedProperties.new(
-                private: { "contact" => event_form.coerced_for(:contact) }
+                private: { "email" => event_form.coerced_for(:email) }
               )
           )
 

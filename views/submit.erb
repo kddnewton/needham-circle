@@ -19,10 +19,10 @@
     </div>
 
     <div class="field">
-      <label for="contact">Contact</label>
-      <input id="contact" type="email" name="contact" required maxlength="200" value="<%= @event.value_for(:contact) %>">
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email" required maxlength="200" value="<%= @event.value_for(:email) %>">
       <small class="field-hint">An email address so our moderators can reach you about your event. It is not shown publicly.</small>
-      <% @event.errors_for(:contact).each do |error| %>
+      <% @event.errors_for(:email).each do |error| %>
         <span class="field-error"><%= error %></span>
       <% end %>
     </div>

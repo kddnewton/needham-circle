@@ -117,7 +117,7 @@ module NeedhamCircle
         "location" => "Town Hall",
         "start_time" => future_local(1),
         "end_time" => future_local(3),
-        "contact" => "organizer@example.com"
+        "email" => "organizer@example.com"
       )
 
       assert_equal 200, last_response.status
@@ -126,18 +126,18 @@ module NeedhamCircle
       calendar_id, form = @fake_calendar.created.first
       assert_equal "submissions-cal-id", calendar_id
       assert_equal "Town Meeting", form.coerced_for(:title)
-      assert_equal "organizer@example.com", form.coerced_for(:contact)
+      assert_equal "organizer@example.com", form.coerced_for(:email)
     end
 
-    def test_submission_requires_a_valid_contact_email
+    def test_submission_requires_a_valid_email
       submit(
-        "title" => "No Contact",
+        "title" => "No Email",
         "start_time" => future_local(1),
         "end_time" => future_local(3),
-        "contact" => "not-an-email"
+        "email" => "not-an-email"
       )
 
-      assert_includes last_response.body, "Contact must be a valid email address."
+      assert_includes last_response.body, "Email must be a valid email address."
       assert_empty @fake_calendar.created
     end
 
@@ -222,7 +222,7 @@ module NeedhamCircle
       (Time.now + hours_ahead * 3600).strftime("%Y-%m-%dT%H:%M")
     end
 
-    def event_view(summary:, location: nil, description: nil, contact: nil)
+    def event_view(summary:, location: nil, description: nil, email: nil)
       google_event =
         Google::Apis::CalendarV3::Event.new(
           summary: summary,
@@ -232,10 +232,10 @@ module NeedhamCircle
           end: Google::Apis::CalendarV3::EventDateTime.new(date_time: Time.now + 90_000)
         )
 
-      if contact
+      if email
         google_event.extended_properties =
           Google::Apis::CalendarV3::Event::ExtendedProperties.new(
-            private: { "contact" => contact }
+            private: { "email" => email }
           )
       end
 
