@@ -21,6 +21,13 @@ module NeedhamCircle
       end
     end
 
+    class ContactForm < Form
+      string_field :name, "Name", required: true, max_length: 100
+      email_field :email, "Email", required: true, max_length: 200
+      string_field :subject, "Subject", max_length: 200
+      string_field :message, "Message", required: true, max_length: 5000
+    end
+
     class FilterForm < Form
       string_field :q, "Search", nullify: true
       multi_select_field :source, "Source", values: Source::ALL.map(&:slug)
@@ -65,8 +72,9 @@ module NeedhamCircle
 
       private
 
-      # Builds a "/" URL for the given source selection, preserving the current
-      # search query. The source param is comma-joined (see MultiSelectField).
+      # Builds a "/events" URL for the given source selection, preserving the
+      # current search query. The source param is comma-joined (see
+      # MultiSelectField).
       #: (Array[String] slugs) -> String
       def filter_url(slugs)
         query_params = {}
@@ -76,7 +84,7 @@ module NeedhamCircle
           query_params["q"] = q
         end
 
-        query_params.empty? ? "/" : "/?#{URI.encode_www_form(query_params)}"
+        query_params.empty? ? "/events" : "/events?#{URI.encode_www_form(query_params)}"
       end
     end
 
@@ -85,11 +93,25 @@ module NeedhamCircle
 
     enable :sessions
     use RateLimit, limit: 5, period: 60, path: "/submit"
+    use RateLimit, limit: 5, period: 60, path: "/contact"
     use Rack::Protection::AuthenticityToken
 
     helpers do
       def google_calendar
         Thread.current[:google_calendar] ||= GoogleCalendar.new(settings.service_account_key)
+      end
+
+      def mailer
+        Thread.current[:mailer] ||= Mailer.new(account: settings.smtp_account, password: settings.smtp_password)
+      end
+
+      #: (ContactForm form) -> Mailer::Result
+      def send_contact(form)
+        result = mailer.deliver_contact(form)
+        if (error = result.error)
+          logger.error("Failed to deliver contact message: #{error.class}: #{error.message}")
+        end
+        result
       end
 
       #: (EventForm event) -> GoogleCalendar::Result[void]
@@ -170,6 +192,31 @@ module NeedhamCircle
       end
 
       erb :submit
+    end
+
+    get "/contact" do
+      @page_title = "Needham Circle — Contact"
+      @page_description = "Get in touch with the Needham Circle organizers."
+      @contact = ContactForm.new
+      erb :contact
+    end
+
+    post "/contact" do
+      @page_title = "Needham Circle — Contact"
+      @page_description = "Get in touch with the Needham Circle organizers."
+      @contact = ContactForm.new(params)
+
+      if @contact.valid?
+        if (error = send_contact(@contact).error)
+          @form_error = true
+        else
+          @submitted = true
+        end
+      else
+        @form_error = true
+      end
+
+      erb :contact
     end
   end
 end

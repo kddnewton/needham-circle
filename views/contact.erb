@@ -1,0 +1,50 @@
+<h2>Contact</h2>
+
+<% if @submitted %>
+  <div class="thanks" role="status">Thanks for reaching out! Your message has been sent to the organizers, and we'll be in touch.</div>
+<% else %>
+  <p>Have a question, an idea, or want to get involved? Send the organizers a note and we'll get back to you.</p>
+
+  <% if @form_error %>
+    <div class="error-summary" role="alert">There was a problem sending your message. Please check the fields and try again.</div>
+  <% end %>
+
+  <form method="post" action="/contact">
+    <input type="hidden" name="authenticity_token" value="<%= session[:csrf] %>">
+
+    <div class="field">
+      <label for="name">Name <span class="required-marker" aria-hidden="true">*</span></label>
+      <input id="name" type="text" name="name" required maxlength="100" value="<%= @contact.value_for(:name) %>">
+      <% @contact.errors_for(:name).each do |error| %>
+        <span class="field-error"><%= error %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <label for="email">Email <span class="required-marker" aria-hidden="true">*</span></label>
+      <input id="email" type="email" name="email" required maxlength="200" value="<%= @contact.value_for(:email) %>">
+      <small class="field-hint">So we can reply to you. It is not shown publicly.</small>
+      <% @contact.errors_for(:email).each do |error| %>
+        <span class="field-error"><%= error %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <label for="subject">Subject</label>
+      <input id="subject" type="text" name="subject" maxlength="200" value="<%= @contact.value_for(:subject) %>">
+      <% @contact.errors_for(:subject).each do |error| %>
+        <span class="field-error"><%= error %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <label for="message">Message <span class="required-marker" aria-hidden="true">*</span></label>
+      <textarea id="message" name="message" rows="6" required maxlength="5000"><%= @contact.value_for(:message) %></textarea>
+      <% @contact.errors_for(:message).each do |error| %>
+        <span class="field-error"><%= error %></span>
+      <% end %>
+    </div>
+
+    <p><button type="submit">Send message</button></p>
+  </form>
+<% end %>

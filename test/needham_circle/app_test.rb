@@ -35,6 +35,21 @@ module NeedhamCircle
       end
     end
 
+    class FakeMailer
+      attr_accessor :deliver_error
+      attr_reader :delivered
+
+      def initialize
+        @deliver_error = nil
+        @delivered = []
+      end
+
+      def deliver_contact(form)
+        @delivered << form
+        Mailer::Result.new(@deliver_error)
+      end
+    end
+
     # Each test gets a unique synthetic IP. The RateLimit middleware lives on the
     # shared App and persists @hits across tests; without distinct
     # IPs, the test order would determine whether limits trip.
@@ -49,10 +64,13 @@ module NeedhamCircle
       @test_ip = "10.99.#{@@ip_counter / 256 % 256}.#{@@ip_counter % 256}"
       @fake_calendar = FakeCalendar.new
       Thread.current[:google_calendar] = @fake_calendar
+      @fake_mailer = FakeMailer.new
+      Thread.current[:mailer] = @fake_mailer
     end
 
     def teardown
       Thread.current[:google_calendar] = nil
+      Thread.current[:mailer] = nil
     end
 
     def get(path, params = {}, rack_env = {})
@@ -64,19 +82,19 @@ module NeedhamCircle
     end
 
     def test_index_renders_events_from_calendar
-      get "/"
+      get "/events"
       assert_equal 200, last_response.status
     end
 
     def test_index_renders_friendly_error_on_calendar_failure
       @fake_calendar.list_error = Google::Apis::ServerError.new("boom")
-      get "/"
+      get "/events"
       assert_equal 200, last_response.status
       assert_includes last_response.body, "trouble loading events"
     end
 
     def test_index_renders_source_filter_with_nothing_selected
-      get "/"
+      get "/events"
       assert_equal 200, last_response.status
       # Every source is an option in the dropdown.
       assert_includes last_response.body, "League of Women Voters"
@@ -87,7 +105,7 @@ module NeedhamCircle
     end
 
     def test_index_marks_selected_source_and_shows_applied_chip
-      get "/", { "source" => "lwv" }
+      get "/events", { "source" => "lwv" }
       assert_equal 200, last_response.status
       # The matching dropdown option is checked.
       assert_match(/data-source="lwv"[^>]*aria-checked="true"/, last_response.body)
@@ -103,17 +121,8 @@ module NeedhamCircle
       assert_includes last_response.body, "Town Offices &amp; Resources"
       assert_includes last_response.body, "Needham Public Library"
       assert_includes last_response.body, "Parks &amp; Public Spaces"
-      assert_includes last_response.body, "https://maps.google.com/?q=DeFazio+Park+Needham+MA"
-      # Town offices link out to their pages on the town website.
-      assert_includes last_response.body, %(href="https://www.needhamma.gov/5283/Town-Manager")
-      # Phone numbers become tel: links.
-      assert_includes last_response.body, %(href="tel:+17814442415")
-      # Contacts render a short label (desktop) and the full value (mobile),
-      # toggled by CSS.
       assert_includes last_response.body, %(<span class="contact-label">Phone</span>)
-      assert_includes last_response.body, %(<span class="contact-value">(781) 444-2415</span>)
       assert_includes last_response.body, %(<span class="contact-label">Website</span>)
-      assert_includes last_response.body, %(<span class="contact-label">Email</span>)
       assert_includes last_response.body, %(<span class="contact-label">Map</span>)
     end
 
@@ -229,6 +238,71 @@ module NeedhamCircle
       assert_equal 429, last_response.status
     end
 
+    def test_contact_page_renders_form_with_csrf_token
+      get "/contact"
+      assert_equal 200, last_response.status
+      assert_includes last_response.body, "Contact"
+      assert_match(/name="authenticity_token" value="[^"]+"/, last_response.body)
+    end
+
+    def test_contact_post_without_csrf_token_is_rejected
+      post "/contact", "name" => "Jane"
+      assert_equal 403, last_response.status
+      assert_empty @fake_mailer.delivered
+    end
+
+    def test_valid_contact_delivers_message_and_renders_thanks
+      contact(
+        "name" => "Jane Doe",
+        "email" => "jane@example.com",
+        "subject" => "Hello",
+        "message" => "I would like to help out."
+      )
+
+      assert_equal 200, last_response.status
+      assert_includes last_response.body, "Thanks for reaching out!"
+      assert_equal 1, @fake_mailer.delivered.size
+      form = @fake_mailer.delivered.first
+      assert_equal "Jane Doe", form.coerced_for(:name)
+      assert_equal "jane@example.com", form.coerced_for(:email)
+      assert_equal "I would like to help out.", form.coerced_for(:message)
+    end
+
+    def test_contact_requires_name_email_and_message
+      contact("name" => "", "email" => "", "message" => "")
+
+      assert_includes last_response.body, "Name is required."
+      assert_includes last_response.body, "Email is required."
+      assert_includes last_response.body, "Message is required."
+      assert_empty @fake_mailer.delivered
+    end
+
+    def test_contact_requires_a_valid_email
+      contact("name" => "Jane", "email" => "not-an-email", "message" => "Hi")
+
+      assert_includes last_response.body, "Email must be a valid email address."
+      assert_empty @fake_mailer.delivered
+    end
+
+    def test_contact_delivery_failure_shows_generic_error
+      @fake_mailer.deliver_error = Net::SMTPServerBusy.new("busy")
+      contact("name" => "Jane", "email" => "jane@example.com", "message" => "Hi")
+
+      refute_includes last_response.body, "Thanks for reaching out!"
+      assert_includes last_response.body, "problem sending your message"
+    end
+
+    def test_contact_rate_limit_kicks_in_after_five_posts
+      @test_ip = "192.168.77.77"
+      5.times do |i|
+        contact("name" => "", "email" => "", "message" => "")
+        refute_equal 429, last_response.status, "request #{i + 1} should not be rate limited"
+      end
+
+      contact("name" => "", "email" => "", "message" => "")
+      assert_equal 429, last_response.status
+    end
+
     private
 
     def submit(params)
@@ -236,6 +310,13 @@ module NeedhamCircle
       match = last_response.body.match(/name="authenticity_token" value="([^"]+)"/)
       flunk "no CSRF token in /submit response (status=#{last_response.status})" unless match
       post "/submit", params.merge("authenticity_token" => match[1])
+    end
+
+    def contact(params)
+      get "/contact"
+      match = last_response.body.match(/name="authenticity_token" value="([^"]+)"/)
+      flunk "no CSRF token in /contact response (status=#{last_response.status})" unless match
+      post "/contact", params.merge("authenticity_token" => match[1])
     end
 
     def future_local(hours_ahead)

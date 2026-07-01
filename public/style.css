@@ -136,6 +136,14 @@ main {
   margin-bottom: 2.5rem;
 }
 
+/* A form's last row (the submit button) needs no trailing margin — the card's
+   padding is the space below it. This matters on the contact page, where the
+   form is the last thing in the card. On submit the disclaimer's own top margin
+   already wins the collapse, so this is a no-op there. */
+form > :last-child {
+  margin-bottom: 0;
+}
+
 h2 {
   margin: 0 0 1.5rem;
   font-size: 1.625rem;
@@ -778,7 +786,7 @@ button[type="submit"]:active {
   border-left: 4px solid var(--error);
   padding: 0.875rem 1rem;
   margin-bottom: 1.5rem;
-  border-radius: 6px;
+  border-radius: 0 6px 6px 0;
   color: var(--error);
   font-size: 0.875rem;
 }
@@ -802,7 +810,7 @@ button[type="submit"]:active {
   background: var(--success-bg);
   border-left: 4px solid var(--success);
   padding: 1rem 1.25rem;
-  border-radius: 6px;
+  border-radius: 0 6px 6px 0;
   color: var(--success);
   font-weight: 500;
 }
