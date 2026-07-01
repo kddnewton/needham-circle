@@ -142,6 +142,7 @@ module NeedhamCircle
     def test_valid_submission_creates_event_and_renders_thanks
       submit(
         "title" => "Town Meeting",
+        "host" => "Town of Needham",
         "description" => "Discuss things",
         "location" => "Town Hall",
         "start_time" => future_local(1),
@@ -155,7 +156,20 @@ module NeedhamCircle
       calendar_id, form = @fake_calendar.created.first
       assert_equal "submissions-cal-id", calendar_id
       assert_equal "Town Meeting", form.coerced_for(:title)
+      assert_equal "Town of Needham", form.coerced_for(:host)
       assert_equal "organizer@example.com", form.coerced_for(:email)
+    end
+
+    def test_submission_requires_a_host
+      submit(
+        "title" => "No Host",
+        "start_time" => future_local(1),
+        "end_time" => future_local(3),
+        "email" => "organizer@example.com"
+      )
+
+      assert_includes last_response.body, "Name of host organization/business is required."
+      assert_empty @fake_calendar.created
     end
 
     def test_submission_requires_a_valid_email

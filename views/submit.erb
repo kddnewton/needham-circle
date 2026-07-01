@@ -19,6 +19,14 @@
     </div>
 
     <div class="field">
+      <label for="host">Name of host organization/business <span class="required-marker" aria-hidden="true">*</span></label>
+      <input id="host" type="text" name="host" required maxlength="200" value="<%= @event.value_for(:host) %>">
+      <% @event.errors_for(:host).each do |error| %>
+        <span class="field-error"><%= error %></span>
+      <% end %>
+    </div>
+
+    <div class="field">
       <label for="email">Email <span class="required-marker" aria-hidden="true">*</span></label>
       <input id="email" type="email" name="email" required maxlength="200" value="<%= @event.value_for(:email) %>">
       <small class="field-hint">An email address so our moderators can reach you about your event. It is not shown publicly.</small>

@@ -183,12 +183,16 @@ module NeedhamCircle
             location: event_form.coerced_for(:location),
             start: event_date_time(event_form.coerced_for(:start_time)),
             end: event_date_time(event_form.coerced_for(:end_time)),
-            # The submitter's contact email is moderator-only metadata, kept in a
-            # private extended property so it never surfaces in the description
-            # the public events list now renders.
+            # The submitter's contact email and host organization are
+            # moderator-only metadata, kept in private extended properties so
+            # they never surface in the description the public events list now
+            # renders.
             extended_properties:
               Google::Apis::CalendarV3::Event::ExtendedProperties.new(
-                private: { "email" => event_form.coerced_for(:email) }
+                private: {
+                  "email" => event_form.coerced_for(:email),
+                  "host" => event_form.coerced_for(:host)
+                }
               )
           )
 

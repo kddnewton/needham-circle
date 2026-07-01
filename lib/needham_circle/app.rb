@@ -4,6 +4,7 @@ module NeedhamCircle
   class App < Sinatra::Base
     class EventForm < Form
       string_field :title, "Title", required: true, max_length: 200
+      string_field :host, "Name of host organization/business", required: true, max_length: 200
       string_field :description, "Description", max_length: 2000
       string_field :location, "Location", max_length: 200
       time_field :start_time, "Start time", required: true, future_only: true
