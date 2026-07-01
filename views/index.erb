@@ -2,7 +2,7 @@
 
 <div class="event-filters" data-filters>
   <div class="filter-bar">
-    <form class="filter-search-form" method="get" action="/">
+    <form class="filter-search-form" method="get" action="/events">
       <% unless @filter.coerced_for(:source).empty? %>
         <input type="hidden" name="source" value="<%= @filter.coerced_for(:source).join(",") %>">
       <% end %>

@@ -37,10 +37,6 @@ body {
   padding: 0 1.5rem;
 }
 
-/* Content-heavy pages (e.g. the resources tables) opt into a wider content
-   card. Scoped to the page's content container (the only .container that is a
-   direct child of body) so the header and nav keep one consistent width across
-   every page rather than shifting when you navigate to a wide page. */
 .wide > .container {
   max-width: 920px;
 }
@@ -152,6 +148,23 @@ p {
   margin: 0 0 1rem;
 }
 
+/* A secondary note set off from the main copy: paper fill, an accent rule down
+   the side, and muted italic text so it reads as an aside rather than body. */
+aside {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background: var(--paper);
+  border-left: 3px solid var(--mid);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  font-size: 0.9375rem;
+  color: rgba(28, 71, 142, 0.75);
+}
+
+aside p:last-child {
+  margin-bottom: 0;
+}
+
 a {
   color: var(--navy);
   text-decoration: underline;
@@ -196,7 +209,6 @@ a:hover {
   margin-bottom: 1.5rem;
 }
 
-/* Sources filter: a native <details> popover so it works without JS. */
 .source-filter {
   position: relative;
 }
@@ -381,9 +393,6 @@ a:hover {
   margin: 0;
 }
 
-/* The magnifying glass is a mask tinted via background-color so it can shift
-   color on focus. It sits dull by default and brightens to the same blue the
-   input border picks up when active (see the input:focus rule). */
 .filter-search-form::before {
   content: "";
   position: absolute;
@@ -461,8 +470,6 @@ a:hover {
   transform: rotate(-90deg);
 }
 
-/* With the list hidden, the heading's bottom margin (which normally separates
-   it from its events) would just pad the gap to the next month. */
 .event-month:not([open]) .event-month-title {
   margin-bottom: 0;
 }
@@ -533,8 +540,6 @@ a:hover {
   overflow-wrap: break-word;
 }
 
-/* Fix the column widths so the grid lines up across all four tables (only in
-   table view — below 600px the rows stack into cards where this is moot). */
 @media (min-width: 601px) {
   .resource-table {
     table-layout: fixed;
@@ -569,17 +574,11 @@ a:hover {
   border-bottom: none;
 }
 
-/* In the desktop table the contact shows a short label; the stacked mobile
-   cards have room to show the full value instead (see the media query below). */
 .contact-value {
   display: none;
 }
 
-/* Below the card's comfortable 3-column width, stack each row into a labeled
-   card so the long descriptions stay readable instead of squeezing. */
 @media (max-width: 600px) {
-  /* Column context is carried by each cell's data-label in card view, so the
-     header row is redundant here (the table is already display:block). */
   .resource-table thead {
     display: none;
   }
@@ -844,7 +843,6 @@ button[type="submit"]:active {
   .filter-bar {
     flex-direction: column;
   }
-  /* Full-width trigger and menu so the dropdown is easy to tap. */
   .source-filter {
     width: 100%;
   }

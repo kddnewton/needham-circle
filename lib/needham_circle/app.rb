@@ -122,20 +122,21 @@ module NeedhamCircle
 
     get "/" do
       @page_title = "Needham Circle"
-      @page_description = "Upcoming community events in Needham Circle. Browse what's happening, and submit your own events."
-      @events = list_events(@filter = FilterForm.new(params))
-      erb :index
+      @page_description = "About Needham Circle: bringing people together, coordinating events across town, and serving as a central hub for community-building."
+      erb :about
     end
 
     get "/events" do
+      @page_title = "Needham Circle — Events"
+      @page_description = "Upcoming community events in Needham Circle. Browse what's happening, and submit your own events."
       @events = list_events(@filter = FilterForm.new(params))
-      erb :events_list, layout: false
-    end
-
-    get "/about" do
-      @page_title = "Needham Circle — About"
-      @page_description = "About Needham Circle."
-      erb :about
+      # The filter script re-requests this route with X-Requested-With to swap
+      # just the list; a normal navigation gets the full page around it.
+      if request.env["HTTP_X_REQUESTED_WITH"] == "fetch"
+        erb :events_list, layout: false
+      else
+        erb :index
+      end
     end
 
     get "/resources" do

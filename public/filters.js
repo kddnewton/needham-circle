@@ -98,11 +98,11 @@
       });
   }
 
-  // Pushes the matching "/" URL so the address bar reflects the filters and
-  // back/forward works, then refreshes the list.
+  // Pushes the matching "/events" URL so the address bar reflects the filters
+  // and back/forward works, then refreshes the list.
   function apply() {
     var qs = queryString();
-    history.pushState(null, "", qs ? "/?" + qs : "/");
+    history.pushState(null, "", qs ? "/events?" + qs : "/events");
     render();
     refresh();
   }

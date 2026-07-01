@@ -37,10 +37,10 @@
 
     <nav class="site-nav" aria-label="Primary">
       <ul class="container">
-        <li><a href="/"<%== ' aria-current="page"' if request.path == "/" %>>Events</a></li>
+        <li><a href="/"<%== ' aria-current="page"' if request.path == "/" %>>About</a></li>
+        <li><a href="/events"<%== ' aria-current="page"' if request.path == "/events" %>>Events</a></li>
         <li><a href="/submit"<%== ' aria-current="page"' if request.path == "/submit" %>>Submit</a></li>
         <li><a href="/resources"<%== ' aria-current="page"' if request.path == "/resources" %>>Resources</a></li>
-        <li><a href="/about"<%== ' aria-current="page"' if request.path == "/about" %>>About</a></li>
       </ul>
     </nav>
 
