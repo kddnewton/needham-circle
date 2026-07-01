@@ -37,6 +37,14 @@ body {
   padding: 0 1.5rem;
 }
 
+/* Content-heavy pages (e.g. the resources tables) opt into a wider content
+   card. Scoped to the page's content container (the only .container that is a
+   direct child of body) so the header and nav keep one consistent width across
+   every page rather than shifting when you navigate to a wide page. */
+.wide > .container {
+  max-width: 920px;
+}
+
 .site-header {
   background: var(--navy);
   color: var(--white);
@@ -493,6 +501,121 @@ a:hover {
 .empty-state {
   color: var(--mid);
   font-style: italic;
+}
+
+.resource-section {
+  margin-bottom: 2.5rem;
+}
+
+.resource-section:last-child {
+  margin-bottom: 0;
+}
+
+.resource-section h3 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.resource-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.resource-table th,
+.resource-table td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: break-word;
+}
+
+/* Fix the column widths so the grid lines up across all four tables (only in
+   table view — below 600px the rows stack into cards where this is moot). */
+@media (min-width: 601px) {
+  .resource-table {
+    table-layout: fixed;
+  }
+  .resource-table tr > :nth-child(1) {
+    width: 28%;
+  }
+  .resource-table tr > :nth-child(2) {
+    width: 54%;
+  }
+  .resource-table tr > :nth-child(3) {
+    width: 18%;
+  }
+}
+
+.resource-table thead th {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mid);
+  border-bottom-width: 2px;
+}
+
+.resource-table tbody th {
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.resource-table tbody tr:last-child th,
+.resource-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* In the desktop table the contact shows a short label; the stacked mobile
+   cards have room to show the full value instead (see the media query below). */
+.contact-value {
+  display: none;
+}
+
+/* Below the card's comfortable 3-column width, stack each row into a labeled
+   card so the long descriptions stay readable instead of squeezing. */
+@media (max-width: 600px) {
+  /* Column context is carried by each cell's data-label in card view, so the
+     header row is redundant here (the table is already display:block). */
+  .resource-table thead {
+    display: none;
+  }
+  .resource-table,
+  .resource-table tbody,
+  .resource-table tr,
+  .resource-table th,
+  .resource-table td {
+    display: block;
+  }
+  .resource-table tr {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .resource-table th,
+  .resource-table td {
+    padding: 0.15rem 0;
+    border-bottom: none;
+  }
+  .resource-table tbody th {
+    font-size: 1.0625rem;
+    margin-bottom: 0.25rem;
+  }
+  .resource-table td[data-label]::before {
+    content: attr(data-label) ": ";
+    font-weight: 700;
+    color: var(--mid);
+  }
+  .contact-label {
+    display: none;
+  }
+  .contact-value {
+    display: inline;
+  }
 }
 
 /* While a filtered list is being fetched, the results are swapped for these

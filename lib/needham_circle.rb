@@ -14,6 +14,7 @@ require "needham_circle/env"
 require "needham_circle/form"
 require "needham_circle/google_calendar"
 require "needham_circle/rate_limit"
+require "needham_circle/resources"
 require "needham_circle/source"
 
 require "needham_circle/sync"

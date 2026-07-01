@@ -138,6 +138,14 @@ module NeedhamCircle
       erb :about
     end
 
+    get "/resources" do
+      @page_title = "Needham Circle — Resources"
+      @page_description = "Community resources for Needham: town offices, affinity groups, nonprofits, and parks."
+      @sections = Resources::SECTIONS
+      @wide = true
+      erb :resources
+    end
+
     get "/submit" do
       @page_title = "Needham Circle — Submit an Event"
       @page_description = "Submit a community event to the Needham Circle calendar."

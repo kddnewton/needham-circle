@@ -97,6 +97,26 @@ module NeedhamCircle
       refute_includes last_response.body, "data-source-count hidden"
     end
 
+    def test_resources_page_renders_sections_and_entries
+      get "/resources"
+      assert_equal 200, last_response.status
+      assert_includes last_response.body, "Town Offices &amp; Resources"
+      assert_includes last_response.body, "Needham Public Library"
+      assert_includes last_response.body, "Parks &amp; Public Spaces"
+      assert_includes last_response.body, "https://maps.google.com/?q=DeFazio+Park+Needham+MA"
+      # Town offices link out to their pages on the town website.
+      assert_includes last_response.body, %(href="https://www.needhamma.gov/5283/Town-Manager")
+      # Phone numbers become tel: links.
+      assert_includes last_response.body, %(href="tel:+17814442415")
+      # Contacts render a short label (desktop) and the full value (mobile),
+      # toggled by CSS.
+      assert_includes last_response.body, %(<span class="contact-label">Phone</span>)
+      assert_includes last_response.body, %(<span class="contact-value">(781) 444-2415</span>)
+      assert_includes last_response.body, %(<span class="contact-label">Website</span>)
+      assert_includes last_response.body, %(<span class="contact-label">Email</span>)
+      assert_includes last_response.body, %(<span class="contact-label">Map</span>)
+    end
+
     def test_submit_page_renders_form_with_csrf_token
       get "/submit"
       assert_equal 200, last_response.status

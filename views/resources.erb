@@ -1,0 +1,31 @@
+<h2>Resources</h2>
+
+<% @sections.each do |section| %>
+  <section class="resource-section">
+    <h3><%= section.title %></h3>
+    <table class="resource-table">
+      <thead>
+        <tr>
+          <th scope="col"><%= section.name_heading %></th>
+          <th scope="col">Description</th>
+          <th scope="col"><%= section.contact_heading %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% section.entries.each do |entry| %>
+          <tr>
+            <th scope="row"><%= entry.name %></th>
+            <td data-label="Description"><%= entry.description %></td>
+            <td data-label="<%= section.contact_heading %>">
+              <% if (href = entry.href) %>
+                <a href="<%= href %>" title="<%= entry.contact %>"<%== ' target="_blank" rel="noopener noreferrer"' if entry.external? %>><span class="contact-label"><%= entry.link_label %></span><span class="contact-value"><%= entry.contact %></span></a>
+              <% else %>
+                <%= entry.contact %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+<% end %>
