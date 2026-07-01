@@ -11,7 +11,7 @@
     <input type="hidden" name="authenticity_token" value="<%= session[:csrf] %>">
 
     <div class="field">
-      <label for="title">Title <span class="required-marker" aria-hidden="true">*</span></label>
+      <label for="title">Event Title <span class="required-marker" aria-hidden="true">*</span></label>
       <input id="title" type="text" name="title" required maxlength="200" value="<%= @event.value_for(:title) %>">
       <% @event.errors_for(:title).each do |error| %>
         <span class="field-error"><%= error %></span>
@@ -79,11 +79,17 @@
   </form>
 
   <small class="submit-disclaimer">
-    Needham Circle welcomes calendar submissions for non-commercial events
-    open to the public. They will be accepted at our sole discretion and may
-    be edited for length, spelling, language, and clarity. Inclusion does not
-    constitute endorsement by Needham Circle, and we are not liable for errors
-    or omissions. Please notify us promptly of any corrections or
-    cancellations.
+    <p>Thank you for contributing to Needham Circle's Community Calendar! To keep
+    this a welcoming, accessible resource for everyone, please ensure your
+    submission meets the following criteria before posting.</p>
+    <ul>
+      <li><strong>Free and open:</strong> All events must be free to attend and open to the general public.</li>
+      <li><strong>Non-political:</strong> We do not accept partisan, political campaign, or candidate fundraising events.</li>
+      <li><strong>Community-focused:</strong> Listings should provide clear value to the local public (e.g., workshops, cultural events, family activities).</li>
+      <li><strong>Review:</strong> All submissions are moderated for alignment with our guidelines and may be edited for length/clarity.</li>
+      <li><strong>Updates:</strong> Organizers are responsible for accuracy. Please notify us immediately if your event is canceled or rescheduled.</li>
+    </ul>
+    <p>Listing an event is for informational purposes only and does not
+    constitute an endorsement of the event, organizers, or content.</p>
   </small>
 <% end %>
